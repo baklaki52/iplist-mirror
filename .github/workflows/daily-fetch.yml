@@ -1,0 +1,48 @@
+name: daily-fetch
+
+on:
+  schedule:
+    - cron: '0 3 * * *'   # 03:00 UTC daily
+  workflow_dispatch: {}
+
+concurrency:
+  group: daily-fetch
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install jq & curl
+        run: sudo apt-get update && sudo apt-get install -y jq curl
+
+      - name: Fetch + normalize
+        run: bash scripts/fetch.sh
+
+      - name: Commit if changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [[ -z "$(git status --porcelain snapshot.json snapshot.sha256)" ]]; then
+            echo "snapshot unchanged — skip commit"
+            exit 0
+          fi
+          TAG="v$(date -u +%Y%m%d)"
+          git config user.name  "iplist-mirror-bot"
+          git config user.email "iplist-mirror-bot@users.noreply.github.com"
+          git add snapshot.json snapshot.sha256
+          git commit -m "snapshot: $(date -u +%Y-%m-%d)"
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "tag $TAG already exists — push commit only"
+            git push origin main
+          else
+            git tag "$TAG"
+            git push --follow-tags origin main
+          fi
