@@ -1,0 +1,5 @@
+/tmp/
+/raw/
+*.log
+.DS_Store
+.last.sha256
