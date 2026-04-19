@@ -127,9 +127,21 @@ fi
 
 echo "done: services=${count} sha256=$(cat snapshot.sha256) size=$(wc -c <snapshot.json | tr -d ' ')"
 
+# Build snapshot-ru-clean.json by subtracting RU country CIDRs (ipverse/rir-ip).
+# Non-fatal: filter_ru.py exits 0 on upstream fetch failure leaving prior
+# clean snapshot in place, so the unfiltered snapshot still ships.
+if command -v python3 >/dev/null 2>&1; then
+  echo "ru-filter:"
+  if ! python3 scripts/filter_ru.py; then
+    echo "WARN: filter_ru.py exited non-zero — snapshot.json still published" >&2
+  fi
+else
+  echo "WARN: python3 not found — skipping snapshot-ru-clean build" >&2
+fi
+
 # No-op detection (only meaningful inside a git worktree).
 if git rev-parse --git-dir >/dev/null 2>&1; then
-  if git diff --quiet -- snapshot.json snapshot.sha256 2>/dev/null; then
+  if git diff --quiet -- snapshot.json snapshot.sha256 snapshot-ru-clean.json snapshot-ru-clean.sha256 ru_filter_report.json 2>/dev/null; then
     echo "no-op: snapshot unchanged vs HEAD"
   fi
 fi

@@ -29,20 +29,29 @@ jobs:
       - name: Commit if changed
         env:
           GH_TOKEN: ${{ github.token }}
+          # Use github.ref_name so workflow_dispatch on a feature branch
+          # pushes back to that branch instead of failing on missing main.
+          # On the daily schedule this resolves to "main" as before.
+          TARGET_BRANCH: ${{ github.ref_name }}
         run: |
-          if [[ -z "$(git status --porcelain snapshot.json snapshot.sha256)" ]]; then
-            echo "snapshot unchanged — skip commit"
+          TRACKED="snapshot.json snapshot.sha256 snapshot-ru-clean.json snapshot-ru-clean.sha256 ru_filter_report.json"
+          if [[ -z "$(git status --porcelain -- $TRACKED)" ]]; then
+            echo "snapshots unchanged — skip commit"
             exit 0
           fi
           TAG="v$(date -u +%Y%m%d)"
           git config user.name  "iplist-mirror-bot"
           git config user.email "iplist-mirror-bot@users.noreply.github.com"
-          git add snapshot.json snapshot.sha256
+          # Add only files that exist (filter_ru may have skipped on upstream failure).
+          for f in $TRACKED; do
+            [[ -f "$f" ]] && git add "$f"
+          done
           git commit -m "snapshot: $(date -u +%Y-%m-%d)"
-          if git rev-parse "$TAG" >/dev/null 2>&1; then
-            echo "tag $TAG already exists — push commit only"
-            git push origin main
-          else
+          # Tag only on the main branch — feature branches just get the commit.
+          if [[ "$TARGET_BRANCH" == "main" ]] && ! git rev-parse "$TAG" >/dev/null 2>&1; then
             git tag "$TAG"
-            git push --follow-tags origin main
+            git push --follow-tags origin "HEAD:$TARGET_BRANCH"
+          else
+            [[ "$TARGET_BRANCH" == "main" ]] && echo "tag $TAG already exists — push commit only"
+            git push origin "HEAD:$TARGET_BRANCH"
           fi
