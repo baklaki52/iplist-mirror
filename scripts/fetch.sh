@@ -147,7 +147,7 @@ fi
 
 # No-op detection (only meaningful inside a git worktree).
 if git rev-parse --git-dir >/dev/null 2>&1; then
-  TRACKED_FILES="snapshot.json snapshot.sha256 snapshot-ru-clean.json snapshot-ru-clean.sha256 ru_filter_report.json by-slug.json by-slug.json.sha256 by-slug-ru-clean.json by-slug-ru-clean.json.sha256"
+  TRACKED_FILES="snapshot.json snapshot.sha256 snapshot-ru-clean.json snapshot-ru-clean.sha256 ru_filter_report.json by-slug.json by-slug.json.sha256 by-slug-ru-clean.json by-slug-ru-clean.json.sha256 all-cidrs.json all-cidrs.json.sha256 all-cidrs-ru-clean.json all-cidrs-ru-clean.json.sha256"
   if git diff --quiet -- $TRACKED_FILES 2>/dev/null; then
     echo "no-op: snapshot unchanged vs HEAD"
   fi

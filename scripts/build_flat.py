@@ -1,37 +1,30 @@
 #!/usr/bin/env python3
-"""build_flat.py — derive a flat slug→CIDR map from the snapshots.
+"""build_flat.py — derive compact flat formats from the snapshots.
 
-Some consumers want a compact dict keyed by the service's primary
-domain instead of walking through the full `services[]` array.
+Two output families are produced for each input snapshot:
 
-Input (produced by fetch.sh / filter_ru.py):
-
-    { "services": [
-        { "slug": "telegram.org", "domains": ["telegram.org", "t.me", ...],
-          "cidr4": ["1.2.3.0/24"], "cidr6": ["2001::/32"], ... }
-      ] }
-
-Output:
-
-    { "telegram.org": ["1.2.3.0/24", "2001::/32"],
-      "whatsapp.com": ["1.2.3.0/24", "2001::/32"] }
-
-Sub-hosts (t.me, core.telegram.org, …) are intentionally not enumerated
-as separate keys: they share the same CIDR pool as the service's primary
-domain, and a host that resolves into any of these CIDRs matches the
-same route. One key per service is enough.
-
-This script produces two derived files alongside the snapshots:
-
-    snapshot.json            → by-slug.json
+    snapshot.json            → by-slug.json          (dict: slug → CIDR list)
+    snapshot.json            → all-cidrs.json        (flat list of all CIDR)
     snapshot-ru-clean.json   → by-slug-ru-clean.json
+    snapshot-ru-clean.json   → all-cidrs-ru-clean.json
+
+`by-slug.*` — dict keyed by service primary domain (one key per service,
+value is cidr4 ∪ cidr6, deduplicated and sorted). Good when consumer
+wants to know which service a prefix belongs to.
+
+`all-cidrs.*` — flat JSON array of every CIDR across every service,
+deduplicated and sorted. Good when consumer only needs the union of
+prefixes (e.g. routing tables, split-tunneling allowlists) and doesn't
+care about per-service breakdown — some importers expect the root
+element to be an array, not an object.
 
 Rules:
-  - Key is `service.slug` (for ~195 of 201 services it's a `domain.tld` pair).
-  - Value is `cidr4 ∪ cidr6`, deduplicated and sorted.
-  - Services with no CIDRs are skipped (no-value entry).
-  - Services with no slug (rare) are skipped.
-  - Output sorted by key for stable diffs.
+  - `slug` is the key in `by-slug.*` (for ~195 of 201 services it's a
+    `domain.tld` pair).
+  - Value is `cidr4 ∪ cidr6`, deduplicated.
+  - Services with no CIDRs are skipped.
+  - Services with no slug are skipped.
+  - Outputs sorted for stable diffs.
 
 Stdlib only. Non-fatal if a source snapshot is missing — that derived
 file is simply not produced.
@@ -46,65 +39,74 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent.parent
-PAIRS = [
-    ("snapshot.json", "by-slug.json"),
-    ("snapshot-ru-clean.json", "by-slug-ru-clean.json"),
+SOURCES = [
+    ("snapshot.json", "by-slug.json", "all-cidrs.json"),
+    ("snapshot-ru-clean.json", "by-slug-ru-clean.json", "all-cidrs-ru-clean.json"),
 ]
 
 
-def build_one(src: Path, dst: Path) -> tuple[int, int]:
-    """Return (service_count, total_cidr_count). Raises if src malformed."""
+def write_json(dst: Path, payload) -> None:
+    tmp = dst.with_suffix(dst.suffix + ".tmp")
+    tmp.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+    )
+    tmp.replace(dst)
+    digest = hashlib.sha256(dst.read_bytes()).hexdigest()
+    dst.with_suffix(dst.suffix + ".sha256").write_text(digest + "\n")
+
+
+def build_one(src: Path, by_slug_dst: Path, flat_dst: Path) -> tuple[int, int, int]:
+    """Return (service_count, by_slug_cidr_sum, flat_cidr_count)."""
     data = json.loads(src.read_text())
     services = data.get("services", [])
     if not isinstance(services, list):
         raise ValueError(f"{src.name}: services[] missing or wrong type")
 
-    out: dict[str, list[str]] = {}
+    by_slug: dict[str, set[str]] = {}
+    all_cidrs: set[str] = set()
     for svc in services:
         slug = (svc.get("slug") or "").strip()
-        if not slug:
-            continue
         cidr4 = svc.get("cidr4") or []
         cidr6 = svc.get("cidr6") or []
-        cidrs = sorted(set(cidr4) | set(cidr6))
+        cidrs = set(cidr4) | set(cidr6)
         if not cidrs:
             continue
-        # Collision is unusual (slug is upstream's primary key) but handle
-        # it defensively by union-merging.
-        if slug in out:
-            out[slug] = sorted(set(out[slug]) | set(cidrs))
+        all_cidrs.update(cidrs)
+        if not slug:
+            continue
+        if slug in by_slug:
+            by_slug[slug] |= cidrs
         else:
-            out[slug] = cidrs
+            by_slug[slug] = set(cidrs)
 
-    final = {k: out[k] for k in sorted(out)}
+    by_slug_final = {k: sorted(by_slug[k]) for k in sorted(by_slug)}
+    all_cidrs_final = sorted(all_cidrs)
 
-    tmp = dst.with_suffix(dst.suffix + ".tmp")
-    tmp.write_text(
-        json.dumps(final, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
-    )
-    tmp.replace(dst)
+    write_json(by_slug_dst, by_slug_final)
+    write_json(flat_dst, all_cidrs_final)
 
-    digest = hashlib.sha256(dst.read_bytes()).hexdigest()
-    dst.with_suffix(dst.suffix + ".sha256").write_text(digest + "\n")
-
-    total_cidrs = sum(len(v) for v in final.values())
-    return (len(final), total_cidrs)
+    by_slug_sum = sum(len(v) for v in by_slug_final.values())
+    return (len(by_slug_final), by_slug_sum, len(all_cidrs_final))
 
 
 def main() -> int:
     any_built = False
-    for src_name, dst_name in PAIRS:
+    for src_name, by_slug_name, flat_name in SOURCES:
         src = ROOT / src_name
-        dst = ROOT / dst_name
         if not src.exists():
             print(f"skip: {src_name} missing")
             continue
         try:
-            services, cidrs = build_one(src, dst)
+            services, by_slug_sum, flat_count = build_one(
+                src, ROOT / by_slug_name, ROOT / flat_name
+            )
         except Exception as e:
-            print(f"FAIL: {src_name} → {dst_name}: {e}", file=sys.stderr)
+            print(f"FAIL: {src_name}: {e}", file=sys.stderr)
             continue
-        print(f"ok:   {dst_name} services={services} cidrs={cidrs}")
+        print(
+            f"ok:   {by_slug_name:28s} services={services} cidr_sum={by_slug_sum}"
+        )
+        print(f"ok:   {flat_name:28s} unique_cidrs={flat_count}")
         any_built = True
 
     if not any_built:
