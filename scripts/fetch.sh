@@ -9,7 +9,7 @@
 # - Empty categories return "{}" (2 bytes) — tolerated, not an error.
 #
 # Behaviour:
-# - 17 categories (casino excluded per downstream-consumer policy; see internal/iplist/types.go).
+# - 17 categories from upstream (sorted by slug).
 # - Per-request: 3 retries × 60s timeout; failure aborts (no partial snapshot).
 # - Merges into snapshot.json at schema_version=1, services sorted by slug.
 # - Emits snapshot.sha256 (hex only, no filename).
