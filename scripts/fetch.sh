@@ -135,13 +135,20 @@ if command -v python3 >/dev/null 2>&1; then
   if ! python3 scripts/filter_ru.py; then
     echo "WARN: filter_ru.py exited non-zero — snapshot.json still published" >&2
   fi
+  # Derive the flat slug → CIDR map ({slug: [cidrs...]}).
+  # Consumes both snapshot.json and snapshot-ru-clean.json if present.
+  echo "build-flat:"
+  if ! python3 scripts/build_flat.py; then
+    echo "WARN: build_flat.py exited non-zero — derived files may be stale" >&2
+  fi
 else
-  echo "WARN: python3 not found — skipping snapshot-ru-clean build" >&2
+  echo "WARN: python3 not found — skipping snapshot-ru-clean & flat derivatives" >&2
 fi
 
 # No-op detection (only meaningful inside a git worktree).
 if git rev-parse --git-dir >/dev/null 2>&1; then
-  if git diff --quiet -- snapshot.json snapshot.sha256 snapshot-ru-clean.json snapshot-ru-clean.sha256 ru_filter_report.json 2>/dev/null; then
+  TRACKED_FILES="snapshot.json snapshot.sha256 snapshot-ru-clean.json snapshot-ru-clean.sha256 ru_filter_report.json by-slug.json by-slug.json.sha256 by-slug-ru-clean.json by-slug-ru-clean.json.sha256"
+  if git diff --quiet -- $TRACKED_FILES 2>/dev/null; then
     echo "no-op: snapshot unchanged vs HEAD"
   fi
 fi
