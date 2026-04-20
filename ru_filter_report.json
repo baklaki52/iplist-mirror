@@ -1,5 +1,5 @@
 {
-  "applied_at": "2026-04-19T14:42:06Z",
+  "applied_at": "2026-04-20T05:34:32Z",
   "by_category": {
     "anime": {
       "services_touched": 6,
@@ -66,8 +66,8 @@
     },
     "youtube": {
       "services_touched": 1,
-      "v4_addresses_removed": 17620000,
-      "v4_removed_prefix_count": 42,
+      "v4_addresses_removed": 17604128,
+      "v4_removed_prefix_count": 43,
       "v6_addresses_removed": 2485790928163845702350199062528,
       "v6_removed_prefix_count": 32
     }
@@ -473,7 +473,8 @@
         "212.188.35.0/24",
         "212.188.37.0/24",
         "212.188.49.0/24",
-        "213.59.192.0/18",
+        "213.59.210.0/24",
+        "213.59.237.0/24",
         "213.221.56.0/27",
         "217.197.248.0/23"
       ],
@@ -530,8 +531,8 @@
   "source": "ipverse/rir-ip",
   "totals": {
     "services_touched": 35,
-    "v4_addresses_removed": 186189064,
-    "v4_removed_prefix_count": 151,
+    "v4_addresses_removed": 186173192,
+    "v4_removed_prefix_count": 152,
     "v6_addresses_removed": 3357305627303256529194719379456,
     "v6_removed_prefix_count": 44
   }
