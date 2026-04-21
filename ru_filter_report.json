@@ -1,5 +1,5 @@
 {
-  "applied_at": "2026-04-20T05:34:32Z",
+  "applied_at": "2026-04-21T05:22:02Z",
   "by_category": {
     "anime": {
       "services_touched": 6,
@@ -51,9 +51,9 @@
       "v6_removed_prefix_count": 3
     },
     "tools": {
-      "services_touched": 3,
-      "v4_addresses_removed": 2560,
-      "v4_removed_prefix_count": 7,
+      "services_touched": 2,
+      "v4_addresses_removed": 2304,
+      "v4_removed_prefix_count": 6,
       "v6_addresses_removed": 79228162514264337593543950336,
       "v6_removed_prefix_count": 1
     },
@@ -113,14 +113,6 @@
         "2a11:27c0::/32"
       ],
       "slug": "bestchange.ru"
-    },
-    {
-      "category": "tools",
-      "removed_v4": [
-        "5.101.152.0/24"
-      ],
-      "removed_v6": [],
-      "slug": "chatgpt.com"
     },
     {
       "category": "video",
@@ -530,9 +522,9 @@
   "schema_version": 1,
   "source": "ipverse/rir-ip",
   "totals": {
-    "services_touched": 35,
-    "v4_addresses_removed": 186173192,
-    "v4_removed_prefix_count": 152,
+    "services_touched": 34,
+    "v4_addresses_removed": 186172936,
+    "v4_removed_prefix_count": 151,
     "v6_addresses_removed": 3357305627303256529194719379456,
     "v6_removed_prefix_count": 44
   }
