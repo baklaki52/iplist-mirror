@@ -1,5 +1,5 @@
 {
-  "applied_at": "2026-04-22T05:20:03Z",
+  "applied_at": "2026-04-23T05:24:33Z",
   "by_category": {
     "anime": {
       "services_touched": 6,
@@ -517,7 +517,7 @@
       "slug": "yummyanime.tv"
     }
   ],
-  "ru_v4_prefix_count": 8586,
+  "ru_v4_prefix_count": 8585,
   "ru_v6_prefix_count": 2180,
   "schema_version": 1,
   "source": "ipverse/rir-ip",
