@@ -1,5 +1,5 @@
 {
-  "applied_at": "2026-04-23T05:24:33Z",
+  "applied_at": "2026-04-24T05:29:20Z",
   "by_category": {
     "anime": {
       "services_touched": 6,
@@ -518,7 +518,7 @@
     }
   ],
   "ru_v4_prefix_count": 8585,
-  "ru_v6_prefix_count": 2180,
+  "ru_v6_prefix_count": 2179,
   "schema_version": 1,
   "source": "ipverse/rir-ip",
   "totals": {
