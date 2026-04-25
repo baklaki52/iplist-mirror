@@ -127,10 +127,27 @@ fi
 
 echo "done: services=${count} sha256=$(cat snapshot.sha256) size=$(wc -c <snapshot.json | tr -d ' ')"
 
-# Build snapshot-ru-clean.json by subtracting RU country CIDRs (ipverse/rir-ip).
-# Non-fatal: filter_ru.py exits 0 on upstream fetch failure leaving prior
-# clean snapshot in place, so the unfiltered snapshot still ships.
+# ASN overlay: inject BGP-truth CIDRs for services where DNS-based discovery
+# misses direct DC subnets (Telegram primarily). Runs BEFORE filter_ru so the
+# RU-clean snapshot also benefits, and AFTER fetch so the base snapshot is
+# already on disk. Non-fatal: missing bgpq4 or fetch failure leaves snapshot
+# untouched.
 if command -v python3 >/dev/null 2>&1; then
+  if command -v bgpq4 >/dev/null 2>&1; then
+    echo "asn-overlay:"
+    if ! python3 scripts/asn_overlay.py; then
+      echo "WARN: asn_overlay.py exited non-zero — proceeding with un-augmented snapshot" >&2
+    fi
+  else
+    echo "WARN: bgpq4 not installed — skipping ASN overlay (Telegram-DC subnets may be incomplete)" >&2
+  fi
+
+  # Build snapshot-ru-clean.json by subtracting RU country CIDRs.
+  # Sources: ipverse/rir-ip (RIPE country-allocated) ∪ russia.iplist.opencck.org
+  # (curated 77 RU services). Union catches both RU-allocated and foreign-IP
+  # RU services.
+  # Non-fatal: filter_ru.py exits 0 on upstream fetch failure leaving prior
+  # clean snapshot in place, so the unfiltered snapshot still ships.
   echo "ru-filter:"
   if ! python3 scripts/filter_ru.py; then
     echo "WARN: filter_ru.py exited non-zero — snapshot.json still published" >&2

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """filter_ru.py — produce snapshot-ru-clean.json by subtracting Russian
-country IP allocations (RIPE-aggregated, sourced from ipverse/rir-ip) from
-each service's cidr4/cidr6.
+country IP allocations from each service's cidr4/cidr6.
 
 Input:   snapshot.json  (built by fetch.sh)
 Outputs: snapshot-ru-clean.json   — same schema + extra `ru_filter` block
@@ -16,6 +15,14 @@ Why:
   fragments under `anime`/`video`, etc. Routing those through a
   foreign-exit VPN is wasteful at best and broken at worst.
 
+Sources (union — both applied):
+  1. ipverse/rir-ip — RIPE-aggregated RU country allocations (broad).
+     Catches everything RIPE-registered to RU, but misses RU services
+     that front their domains on foreign IPs (Cloudflare/Akamai edge).
+  2. russia.iplist.opencck.org — 77 curated RU service slugs
+     (sber, vk, yandex, gosuslugi, ozon, …) with hourly DNS re-resolve.
+     Catches RU-service IPs that live on foreign ASNs.
+
 Strategy:
   Pure CIDR set subtraction (allowed - RU). For each {cidr4, cidr6} list
   in every service, drop any prefix fully inside a RU block, and split
@@ -25,10 +32,10 @@ Strategy:
   "partial overlap" to worry about.
 
 Failure mode:
-  If RU lists can't be fetched (network / upstream outage), the script
-  exits 0 without overwriting snapshot-ru-clean.json. Stale clean
-  snapshot wins over a broken fresh one. fetch.sh treats this as
-  non-fatal so the unfiltered snapshot.json still ships.
+  Source #1 fetch failure aborts (it's authoritative for country-level RU).
+  Source #2 fetch failure logs a warning and proceeds with #1 only —
+  better partial coverage than no output. Either way, on hard failure the
+  prior snapshot-ru-clean.json is left untouched.
 
 Stdlib only — no pip dependencies.
 """
@@ -58,6 +65,19 @@ RU_V6_URL = (
     "country/ru/ipv6-aggregated.txt"
 )
 SOURCE_REPO = "ipverse/rir-ip"
+
+# Secondary precise whitelist: 77 RU services (sber, gosuslugi, ozon, vk,
+# yandex, etc.) — same maintainer as iplist.opencck.org, dedicated subdomain.
+# Catches RU-service CIDRs hosted on foreign IPs (Cloudflare-fronted .ru
+# domains, Akamai RU-edge), which ipverse/rir-ip misses because they're not
+# RIPE-allocated to RU. Used together with rir-ip for full coverage.
+RU_OPENCCK_V4_URL = (
+    "https://russia.iplist.opencck.org/?format=text&data=cidr4&group=russia"
+)
+RU_OPENCCK_V6_URL = (
+    "https://russia.iplist.opencck.org/?format=text&data=cidr6&group=russia"
+)
+RU_OPENCCK_REPO = "russia.iplist.opencck.org"
 USER_AGENT = "iplist-mirror-bot/1.0 (+https://github.com/baklaki52/iplist-mirror)"
 HTTP_TIMEOUT = 60
 HTTP_RETRIES = 3
@@ -171,10 +191,17 @@ def subtract_ru(allowed: list, ru: list) -> tuple[list, list]:
     return result, removed
 
 
-def filter_snapshot(snap: dict, ru_v4: list, ru_v6: list) -> tuple[dict, dict]:
+def filter_snapshot(
+    snap: dict, ru_v4: list, ru_v6: list, sources_meta: list
+) -> tuple[dict, dict]:
     """Return (filtered_snap, report). filtered_snap is a deep-copy with
     cidr4/cidr6 rewritten. Report breaks down removals by category +
-    service."""
+    service.
+
+    sources_meta is a list of {repo, v4_url, v6_url, v4_count, v6_count, status}
+    describing each RU source contributing to the union. Written into the
+    snapshot's `ru_filter` block and the standalone report.
+    """
     services = snap.get("services", [])
     new_services = []
 
@@ -223,9 +250,7 @@ def filter_snapshot(snap: dict, ru_v4: list, ru_v6: list) -> tuple[dict, dict]:
     new_snap["services"] = new_services
     new_snap["ru_filter"] = {
         "applied": True,
-        "source": SOURCE_REPO,
-        "source_v4_url": RU_V4_URL,
-        "source_v6_url": RU_V6_URL,
+        "sources": sources_meta,
         "ru_v4_prefix_count": len(ru_v4),
         "ru_v6_prefix_count": len(ru_v6),
         "applied_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -234,7 +259,7 @@ def filter_snapshot(snap: dict, ru_v4: list, ru_v6: list) -> tuple[dict, dict]:
     report = {
         "schema_version": 1,
         "applied_at": new_snap["ru_filter"]["applied_at"],
-        "source": SOURCE_REPO,
+        "sources": sources_meta,
         "ru_v4_prefix_count": len(ru_v4),
         "ru_v6_prefix_count": len(ru_v6),
         "totals": {
@@ -303,7 +328,10 @@ def main(argv: Iterable[str] | None = None) -> int:
     print(f"filter_ru: input={in_path}")
     snap = json.loads(in_path.read_text())
 
-    print(f"filter_ru: fetching RU v4 from {RU_V4_URL}")
+    sources_meta: list = []
+
+    # Source 1: ipverse/rir-ip — authoritative RIPE country block (broad).
+    print(f"filter_ru: [1/2] fetching ipverse/rir-ip RU lists")
     try:
         ru_v4_text = http_get(RU_V4_URL)
         ru_v6_text = http_get(RU_V6_URL)
@@ -318,15 +346,78 @@ def main(argv: Iterable[str] | None = None) -> int:
             return 0
         return 1
 
-    ru_v4 = parse_cidr_list(ru_v4_text, ipaddress.IPv4Network)
-    ru_v6 = parse_cidr_list(ru_v6_text, ipaddress.IPv6Network)
-    print(f"filter_ru: RU v4={len(ru_v4)} v6={len(ru_v6)}")
+    ru_v4_ipverse = parse_cidr_list(ru_v4_text, ipaddress.IPv4Network)
+    ru_v6_ipverse = parse_cidr_list(ru_v6_text, ipaddress.IPv6Network)
+    print(
+        f"filter_ru: [1/2] ipverse v4={len(ru_v4_ipverse)} v6={len(ru_v6_ipverse)}"
+    )
 
-    if not ru_v4 or not ru_v6:
-        print("WARN: empty RU list — refusing to write potentially-broken output", file=sys.stderr)
+    if not ru_v4_ipverse or not ru_v6_ipverse:
+        print(
+            "WARN: empty ipverse RU list — refusing to write potentially-broken output",
+            file=sys.stderr,
+        )
         return 0 if args.allow_fetch_failure else 1
 
-    new_snap, report = filter_snapshot(snap, ru_v4, ru_v6)
+    sources_meta.append(
+        {
+            "repo": SOURCE_REPO,
+            "v4_url": RU_V4_URL,
+            "v6_url": RU_V6_URL,
+            "v4_prefix_count": len(ru_v4_ipverse),
+            "v6_prefix_count": len(ru_v6_ipverse),
+            "status": "ok",
+        }
+    )
+
+    # Source 2: russia.iplist.opencck.org — 77 curated RU services (graceful).
+    print(f"filter_ru: [2/2] fetching {RU_OPENCCK_REPO}")
+    ru_v4_opencck: list = []
+    ru_v6_opencck: list = []
+    opencck_status = "ok"
+    try:
+        ru_v4_opencck_text = http_get(RU_OPENCCK_V4_URL)
+        ru_v6_opencck_text = http_get(RU_OPENCCK_V6_URL)
+        ru_v4_opencck = parse_cidr_list(ru_v4_opencck_text, ipaddress.IPv4Network)
+        ru_v6_opencck = parse_cidr_list(ru_v6_opencck_text, ipaddress.IPv6Network)
+        print(
+            f"filter_ru: [2/2] opencck v4={len(ru_v4_opencck)} v6={len(ru_v6_opencck)}"
+        )
+    except RuntimeError as exc:
+        opencck_status = f"fetch_failed: {exc}"
+        print(
+            f"WARN: opencck RU fetch failed — proceeding with ipverse only: {exc}",
+            file=sys.stderr,
+        )
+
+    sources_meta.append(
+        {
+            "repo": RU_OPENCCK_REPO,
+            "v4_url": RU_OPENCCK_V4_URL,
+            "v6_url": RU_OPENCCK_V6_URL,
+            "v4_prefix_count": len(ru_v4_opencck),
+            "v6_prefix_count": len(ru_v6_opencck),
+            "status": opencck_status,
+        }
+    )
+
+    # Union both sources, deduplicate by canonical CIDR string.
+    ru_v4_seen: dict[str, ipaddress.IPv4Network] = {}
+    for n in ru_v4_ipverse + ru_v4_opencck:
+        ru_v4_seen[str(n)] = n
+    ru_v6_seen: dict[str, ipaddress.IPv6Network] = {}
+    for n in ru_v6_ipverse + ru_v6_opencck:
+        ru_v6_seen[str(n)] = n
+    ru_v4 = list(ru_v4_seen.values())
+    ru_v6 = list(ru_v6_seen.values())
+    print(
+        f"filter_ru: union v4={len(ru_v4)} (ipverse={len(ru_v4_ipverse)}"
+        f" + opencck={len(ru_v4_opencck)} - dupes)"
+        f" v6={len(ru_v6)} (ipverse={len(ru_v6_ipverse)}"
+        f" + opencck={len(ru_v6_opencck)} - dupes)"
+    )
+
+    new_snap, report = filter_snapshot(snap, ru_v4, ru_v6, sources_meta)
 
     out_bytes = (
         json.dumps(new_snap, ensure_ascii=False, separators=(",", ":")) + "\n"
