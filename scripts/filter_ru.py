@@ -118,6 +118,40 @@ def parse_cidr_list(text: str, family: type) -> list:
     return out
 
 
+def _restrict_to_ipverse(opencck: list, ipverse: list) -> list:
+    """Keep only opencck CIDRs that are fully contained within some
+    ipverse RIPE-RU block. Opencck publishes A-records of RU services
+    regardless of hosting AS, which includes Cloudflare/Google/AWS-fronted
+    edges. Subtracting those wholesale destroys aggregation of foreign CDN
+    blocks in unrelated categories. RIPE country allocation is the
+    authoritative answer to "is this prefix Russian-operated", so we
+    require opencck CIDRs to fall fully inside a RIPE-RU block.
+
+    O(n*m) worst-case with a /8 (v4) or /16 (v6) bucket index, fine for
+    ~1k opencck × ~10k ipverse.
+    """
+    if not opencck or not ipverse:
+        return []
+    sample = ipverse[0]
+    if isinstance(sample, ipaddress.IPv4Network):
+        shift = 24
+    else:
+        shift = 112
+    buckets: dict[int, list] = defaultdict(list)
+    for net in ipverse:
+        start = int(net.network_address) >> shift
+        end = int(net.broadcast_address) >> shift
+        for k in range(start, end + 1):
+            buckets[k].append(net)
+
+    kept = []
+    for cand in opencck:
+        key = int(cand.network_address) >> shift
+        if any(cand.subnet_of(rb) for rb in buckets.get(key, [])):
+            kept.append(cand)
+    return kept
+
+
 def subtract_ru(allowed: list, ru: list) -> tuple[list, list]:
     """Return (filtered_allowed, removed) where each prefix in `ru` is
     excised from `allowed`. `allowed` order is preserved among
@@ -371,17 +405,34 @@ def main(argv: Iterable[str] | None = None) -> int:
     )
 
     # Source 2: russia.iplist.opencck.org — 77 curated RU services (graceful).
+    #
+    # IMPORTANT: opencck publishes A-records of RU services regardless of
+    # which AS hosts them. This includes Cloudflare-fronted .ru domains
+    # (104.x.x.x), AWS-edge (52.x), and even the entire Google /16 blocks
+    # (142.250.0.0/16, 142.251.0.0/16) when a RU site embeds Google services.
+    #
+    # Subtracting these wholesale destroys aggregation of foreign CDN blocks
+    # in other categories (e.g. youtube): broad YT prefixes get split into
+    # hundreds of tiny holes around Cloudflare/Google IPs that some RU site
+    # happens to use. WireGuard clients then have to match against thousands
+    # of tiny prefixes — observed real-world impact: YouTube playback delay.
+    #
+    # Fix: restrict opencck CIDRs to those FULLY WITHIN RIPE-allocated RU
+    # blocks (source 1). This keeps the value of opencck — narrower RU
+    # ranges that ipverse aggregation might miss (Yandex Cloud /16 inside
+    # AS13238, MTS /16, Azure-RU tenant blocks) — while filtering out
+    # global CDN prefixes that happen to host RU-fronted domains.
     print(f"filter_ru: [2/2] fetching {RU_OPENCCK_REPO}")
-    ru_v4_opencck: list = []
-    ru_v6_opencck: list = []
+    ru_v4_opencck_raw: list = []
+    ru_v6_opencck_raw: list = []
     opencck_status = "ok"
     try:
         ru_v4_opencck_text = http_get(RU_OPENCCK_V4_URL)
         ru_v6_opencck_text = http_get(RU_OPENCCK_V6_URL)
-        ru_v4_opencck = parse_cidr_list(ru_v4_opencck_text, ipaddress.IPv4Network)
-        ru_v6_opencck = parse_cidr_list(ru_v6_opencck_text, ipaddress.IPv6Network)
+        ru_v4_opencck_raw = parse_cidr_list(ru_v4_opencck_text, ipaddress.IPv4Network)
+        ru_v6_opencck_raw = parse_cidr_list(ru_v6_opencck_text, ipaddress.IPv6Network)
         print(
-            f"filter_ru: [2/2] opencck v4={len(ru_v4_opencck)} v6={len(ru_v6_opencck)}"
+            f"filter_ru: [2/2] opencck raw v4={len(ru_v4_opencck_raw)} v6={len(ru_v6_opencck_raw)}"
         )
     except RuntimeError as exc:
         opencck_status = f"fetch_failed: {exc}"
@@ -390,14 +441,31 @@ def main(argv: Iterable[str] | None = None) -> int:
             file=sys.stderr,
         )
 
+    # Restrict opencck CIDRs to those fully inside RIPE-RU blocks.
+    ru_v4_opencck = _restrict_to_ipverse(ru_v4_opencck_raw, ru_v4_ipverse)
+    ru_v6_opencck = _restrict_to_ipverse(ru_v6_opencck_raw, ru_v6_ipverse)
+    skipped_v4 = len(ru_v4_opencck_raw) - len(ru_v4_opencck)
+    skipped_v6 = len(ru_v6_opencck_raw) - len(ru_v6_opencck)
+    if ru_v4_opencck_raw or ru_v6_opencck_raw:
+        print(
+            f"filter_ru: [2/2] opencck restricted to RIPE-RU: "
+            f"v4={len(ru_v4_opencck)} (skipped {skipped_v4} non-RU CDN/global) "
+            f"v6={len(ru_v6_opencck)} (skipped {skipped_v6})"
+        )
+
     sources_meta.append(
         {
             "repo": RU_OPENCCK_REPO,
             "v4_url": RU_OPENCCK_V4_URL,
             "v6_url": RU_OPENCCK_V6_URL,
+            "v4_raw_prefix_count": len(ru_v4_opencck_raw),
+            "v6_raw_prefix_count": len(ru_v6_opencck_raw),
             "v4_prefix_count": len(ru_v4_opencck),
             "v6_prefix_count": len(ru_v6_opencck),
+            "v4_skipped_outside_ripe_ru": skipped_v4,
+            "v6_skipped_outside_ripe_ru": skipped_v6,
             "status": opencck_status,
+            "restriction": "fully-within-ipverse-ru-only",
         }
     )
 
