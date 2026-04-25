@@ -33,6 +33,8 @@
   для сервисов, чьи DC-подсети не видны через DNS (Telegram); см. [ASN overlay](#asn-overlay)
 - `scripts/filter_ru.py` — вычитатель RU-CIDR (двухисточниковый), вызывается из `fetch.sh`
 - `scripts/build_flat.py` — сборщик производных форматов `by-slug*.json` и `all-cidrs*.json`
+- `scripts/diff_snapshots.py` — структурный diff между двумя версиями `snapshot-ru-clean.json`
+  с health-check критичных IP (Gemini, YouTube, Telegram и т.д.); см. [Diff & promotion gate](#diff--promotion-gate)
 
 ## Схема
 
@@ -163,6 +165,76 @@ Messenger LLP), реально обслуживают медиа-CDN, но не 
 Overlay применяется **до** `filter_ru.py`, поэтому ASN-CIDR проходят
 через RU-вычитку наравне с upstream-CIDR (если AS62041 случайно
 содержит RU-префикс — он будет удалён из чистого снимка).
+
+## Diff & promotion gate
+
+`scripts/diff_snapshots.py` — структурный diff между двумя версиями
+`snapshot-ru-clean.json`. Используется для:
+
+1. **Аудита** — посмотреть что изменилось между двумя датами/коммитами/файлами.
+2. **Promotion gate в CI** — workflow вызывает diff перед коммитом нового
+   snapshot и **отказывается публиковать** его, если регрессия задевает
+   IP из списка `CRITICAL_IPS` (Gemini, YouTube, OpenAI/Claude, Telegram,
+   Discord). При регрессии prod остаётся на последнем известно-рабочем
+   snapshot — стабильность важнее свежести.
+
+### Источники сравнения
+
+Оба аргумента принимают:
+
+- путь к файлу: `snapshot-ru-clean.json`, `/tmp/old.json`
+- git-ссылку: `HEAD~1`, `main`, `v20260424`, `5029906`
+- явный `<ref>:<path>` для нестандартных файлов: `main:snapshot.json`
+
+По умолчанию из git-ссылок забирается `snapshot-ru-clean.json`
+(переопределяется флагом `--file`).
+
+### Примеры
+
+```bash
+# Сравнить сегодняшний снимок с вчерашним релизом
+./scripts/diff_snapshots.py v20260424 main
+
+# Адхок-проверка перед PR: локальный fetch.sh vs main
+bash scripts/fetch.sh && ./scripts/diff_snapshots.py main: ./snapshot-ru-clean.json
+
+# Диагностика: какой именно коммит сломал coverage?
+./scripts/diff_snapshots.py 5029906 HEAD
+```
+
+### Что проверяет
+
+- Total v4/v6 CIDR-counts с разницей.
+- Removed / added CIDRs (с приоритетом на широкие префиксы — они опаснее).
+- Per-service deltas (только slug-и где cidr4-count изменился).
+- ASN overlay diff (новые/удалённые entries, изменения по ASN).
+- ru_filter sources diff (добавление/удаление источников, изменение
+  счётчиков, новые `skipped_outside_ripe_ru` для opencck).
+- **Critical IP health-check** — для каждого IP в `CRITICAL_IPS`:
+  где был покрыт в before, где покрыт в after, отметка REGRESSION
+  если IP перестал быть covered.
+
+### Exit codes
+
+- `0` — нет регрессии (только additions, либо identical, либо removals
+  не задели critical IPs).
+- `1` — задет хотя бы один critical IP **или** есть removed CIDRs (CI gate).
+- `2` — bad arguments или невозможно загрузить snapshots.
+
+### CI gate (workflow `daily-fetch.yml`)
+
+После `bash scripts/fetch.sh` workflow:
+
+1. Сохраняет свежепостроенный `snapshot-ru-clean.json` в `/tmp/candidate-ru-clean.json`.
+2. Восстанавливает `origin/main:snapshot-ru-clean.json` для baseline.
+3. Запускает `diff_snapshots.py` candidate vs main.
+4. Если exit `0` — продолжает публиковать candidate как обычно.
+5. Если exit `1` — **откатывает** snapshot обратно на main (prod не трогается),
+   workflow падает с error-аннотацией. Можно посмотреть в Actions UI что именно
+   сломалось.
+
+Расширение списка `CRITICAL_IPS` в `scripts/diff_snapshots.py` — единственная
+правка, нужная чтобы добавить новую защищённую coverage-точку.
 
 ## Плоские форматы `by-slug` и `all-cidrs`
 

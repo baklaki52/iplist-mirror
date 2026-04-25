@@ -26,6 +26,35 @@ jobs:
       - name: Fetch + normalize
         run: bash scripts/fetch.sh
 
+      - name: Diff vs previous main + critical-IP regression gate
+        # Compares the freshly built snapshot-ru-clean.json against the one
+        # currently on main. Fails (exit 1) if any IP in the CRITICAL_IPS
+        # list (Gemini, YouTube, OpenAI, Telegram, etc.) lost coverage —
+        # blocks the commit so prod stays on the last-known-good snapshot.
+        # Removed CIDRs without critical impact = printed as warning, not blocking.
+        run: |
+          # Save freshly built snapshot aside
+          cp snapshot-ru-clean.json /tmp/candidate-ru-clean.json
+
+          # Restore origin/main snapshot for comparison baseline
+          git fetch origin main --quiet
+          if git show origin/main:snapshot-ru-clean.json > /tmp/main-ru-clean.json 2>/dev/null; then
+            echo "::group::Snapshot diff vs origin/main"
+            python3 scripts/diff_snapshots.py /tmp/main-ru-clean.json /tmp/candidate-ru-clean.json
+            EC=$?
+            echo "::endgroup::"
+            if [ $EC -ne 0 ]; then
+              echo "::error::Critical IP regression — refusing to publish broken snapshot"
+              echo "Restore prior snapshot to leave prod untouched:"
+              cp /tmp/main-ru-clean.json snapshot-ru-clean.json
+              # Also restore .sha256 to match
+              git show origin/main:snapshot-ru-clean.sha256 > snapshot-ru-clean.sha256 2>/dev/null || true
+              exit 1
+            fi
+          else
+            echo "::warning::origin/main has no snapshot-ru-clean.json yet — skipping diff (first run)"
+          fi
+
       - name: Commit if changed
         env:
           GH_TOKEN: ${{ github.token }}
