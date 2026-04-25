@@ -20,8 +20,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install jq & curl
-        run: sudo apt-get update && sudo apt-get install -y jq curl
+      - name: Install jq, curl, bgpq4
+        run: sudo apt-get update && sudo apt-get install -y jq curl bgpq4
 
       - name: Fetch + normalize
         run: bash scripts/fetch.sh
