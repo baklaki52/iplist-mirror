@@ -52,6 +52,29 @@ OVERLAYS = [
         "min_expected_v4": 10,
         "min_expected_v6": 0,
     },
+    {
+        # Twitter / X — owns dedicated ASN (Twitter Inc.). DNS resolves only
+        # ~13 prefixes from x.com / api.x.com / abs.twimg.com / pbs.twimg.com,
+        # but BGP shows ~186 actively announced. Direct DC subnets host
+        # video/streaming infra that's not surfaced via the public name.
+        "slug": "x.com",
+        "category": "socials",
+        "asns": ["AS13414"],
+        "min_expected_v4": 50,
+        "min_expected_v6": 0,
+    },
+    {
+        # Discord voice/media — i3D.net AS49544 hosts Discord-managed voice
+        # regions, AS40142 (Discord Inc) hosts control plane. DNS resolves
+        # only 1 v4 prefix for discord.media — ~185 are actually announced.
+        # Without overlay, voice/video calls drop or never connect from RU
+        # because bare-IP voice servers aren't in any A-record.
+        "slug": "discord.media",
+        "category": "discord",
+        "asns": ["AS49544", "AS40142"],
+        "min_expected_v4": 50,
+        "min_expected_v6": 0,
+    },
 ]
 
 BGPQ4_TIMEOUT = 60
