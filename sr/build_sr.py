@@ -63,26 +63,48 @@ services = snap.get("services", [])
 if not services:
     sys.exit(f"{SNAP}: no services")
 
+# Suffix-collapse: DOMAIN-SUFFIX,parent already matches every *.parent, so any
+# domain whose dot-boundary parent is also listed is dead weight. opencck ships
+# parent + dozens of subdomains -> ~90% of domain rules are redundant. We drop
+# them (zero routing change) and dedup CIDRs across services. Same coverage,
+# ~80% fewer rules -> lighter on Shadowrocket's per-connection matching.
+_all_domains = set()
+for svc in services:
+    for d in svc.get("domains", []):
+        d = d.strip().lower().rstrip(".")
+        if d:
+            _all_domains.add(d)
+
+
+def _redundant(d):
+    parts = d.split(".")
+    for i in range(1, len(parts) - 1):
+        if ".".join(parts[i:]) in _all_domains:
+            return True
+    return False
+
+
 # build the shared rule body once
 rule_lines = []
-all_cidrs, seen = [], set()
+all_cidrs, seen, seen_dom = [], set(), set()
 n_dom = n_v4 = n_v6 = 0
 for svc in sorted(services, key=lambda s: (s.get("category", ""), s.get("slug", ""))):
-    domains = sorted(set(d.strip() for d in svc.get("domains", []) if d.strip()))
-    v4 = [c.strip() for c in svc.get("cidr4", []) if c.strip()]
-    v6 = [c.strip() for c in svc.get("cidr6", []) if c.strip()]
+    domains = sorted({d.strip().lower().rstrip(".") for d in svc.get("domains", []) if d.strip()})
+    domains = [d for d in domains if not _redundant(d) and d not in seen_dom]
+    v4 = [c.strip() for c in svc.get("cidr4", []) if c.strip() and c.strip() not in seen]
+    v6 = [c.strip() for c in svc.get("cidr6", []) if c.strip() and c.strip() not in seen]
     if not (domains or v4 or v6):
         continue
     rule_lines.append("")
     rule_lines.append(f"# {svc.get('slug','')} ({svc.get('category','')})")
     for d in domains:
-        rule_lines.append(f"DOMAIN-SUFFIX,{d},PROXY"); n_dom += 1
+        rule_lines.append(f"DOMAIN-SUFFIX,{d},PROXY"); n_dom += 1; seen_dom.add(d)
     for c in v4:
         rule_lines.append(f"IP-CIDR,{c},PROXY,no-resolve"); n_v4 += 1
-        if c not in seen: seen.add(c); all_cidrs.append(c)
+        seen.add(c); all_cidrs.append(c)
     for c in v6:
         rule_lines.append(f"IP-CIDR6,{c},PROXY,no-resolve"); n_v6 += 1
-        if c not in seen: seen.add(c); all_cidrs.append(c)
+        seen.add(c); all_cidrs.append(c)
 
 TAIL = [
     "", "# LAN",
