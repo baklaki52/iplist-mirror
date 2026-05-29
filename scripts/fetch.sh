@@ -9,7 +9,8 @@
 # - Empty categories return "{}" (2 bytes) — tolerated, not an error.
 #
 # Behaviour:
-# - 17 categories from upstream (sorted by slug).
+# - 18 categories from upstream (sorted by slug), incl. `ai` (chatgpt, claude,
+#   gemini, grok, perplexity, deepseek, copilot…) — services that geo-block RU.
 # - Per-request: 3 retries × 60s timeout; failure aborts (no partial snapshot).
 # - Merges into snapshot.json at schema_version=1, services sorted by slug.
 # - Emits snapshot.sha256 (hex only, no filename).
@@ -21,7 +22,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
 CATEGORIES=(
-  tools search news video youtube socials
+  ai tools search news video youtube socials
   messengers music shop education art anime
   games jetbrains discord torrent porn
 )
