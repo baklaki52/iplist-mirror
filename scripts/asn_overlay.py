@@ -77,6 +77,20 @@ OVERLAYS = [
     },
 ]
 
+# Domain overlays — upstream (opencck) domain lists lag service rebrandings.
+# Anthropic moved its primary product domain claude.ai -> claude.com, but the
+# opencck `claude.ai` service still lists only claude.ai/anthropic.com. Without
+# claude.com here, browsing claude.com falls through to DIRECT and leaks the
+# user's real (RU) IP -> Anthropic "App unavailable in region". Additive +
+# idempotent: re-running merges nothing new.
+DOMAIN_OVERLAYS = [
+    {
+        "slug": "claude.ai",
+        "category": "ai",
+        "domains": ["claude.com", "www.claude.com"],
+    },
+]
+
 BGPQ4_TIMEOUT = 60
 
 
@@ -144,6 +158,21 @@ def merge_cidrs(existing: list[str], fresh: list[str], family: int) -> tuple[lis
         added += 1
     merged_sorted = sorted({str(n) for n in existing_nets})
     return merged_sorted, added
+
+
+def merge_domains(existing: list[str], fresh: list[str]) -> tuple[list[str], int]:
+    """Add `fresh` domains to `existing` (case-insensitive dedupe). Returns
+    (merged_sorted, added_count)."""
+    seen = {d.strip().lower() for d in existing if d.strip()}
+    merged = [d.strip() for d in existing if d.strip()]
+    added = 0
+    for d in fresh:
+        dl = d.strip().lower()
+        if dl and dl not in seen:
+            merged.append(d.strip())
+            seen.add(dl)
+            added += 1
+    return sorted(set(merged)), added
 
 
 def find_service(services: list[dict], slug: str) -> dict | None:
@@ -224,7 +253,32 @@ def main() -> int:
             f"(now {len(merged_v4)} v4, {len(merged_v6)} v6)"
         )
 
-    if total_added_v4 == 0 and total_added_v6 == 0:
+    # Domain overlays (run regardless of bgpq4 — pure data injection).
+    total_added_dom = 0
+    for cfg in DOMAIN_OVERLAYS:
+        slug = cfg["slug"]
+        svc = find_service(services, slug)
+        if svc is None:
+            svc = {
+                "slug": slug,
+                "name": slug,
+                "category": cfg["category"],
+                "cidr4": [],
+                "cidr6": [],
+                "domains": [],
+                "dns": [],
+            }
+            services.append(svc)
+            services.sort(key=lambda s: s.get("slug", ""))
+            print(f"  created new service {slug} (domain overlay)")
+        merged_dom, added_dom = merge_domains(svc.get("domains", []), cfg["domains"])
+        svc["domains"] = merged_dom
+        total_added_dom += added_dom
+        if added_dom:
+            overlay_meta.append({"slug": slug, "domains_added": added_dom})
+        print(f"domain_overlay: {slug} +{added_dom} domains (now {len(merged_dom)})")
+
+    if total_added_v4 == 0 and total_added_v6 == 0 and total_added_dom == 0:
         print("asn_overlay: nothing to add — snapshot unchanged")
         return 0
 
