@@ -3,3 +3,4 @@
 *.log
 .DS_Store
 .last.sha256
+sr/split-private.conf

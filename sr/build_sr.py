@@ -1,36 +1,40 @@
 #!/usr/bin/env python3
 """
-build_sr.py — emit a self-contained Shadowrocket config from the iplist-mirror snapshot.
+build_sr.py — emit self-contained Shadowrocket configs from the iplist-mirror snapshot.
 
-Reproduces the proven "ip-list proxy" layout: one [Rule] section grouped per
-service, each block = a `# slug (category)` comment, then all DOMAIN-SUFFIX
-rules (-> PROXY), then all IP-CIDR / IP-CIDR6 rules (-> PROXY, no-resolve).
-Everything inlined — domains AND the exact RU-subtracted CIDR set — so routing
-is as precise as the catalog allows. The proxy itself comes from the user's
-VLESS subscription (PROXY policy); no [Proxy] server is embedded.
+Layout ("ip-list proxy"): one [Rule] section grouped per service — a
+`# slug (category)` comment, then DOMAIN-SUFFIX rules (-> PROXY), then the exact
+RU-subtracted IP-CIDR / IP-CIDR6 rules (-> PROXY, no-resolve). Everything inlined.
+The proxy itself comes from the user's VLESS subscription (PROXY policy); no
+[Proxy] server is embedded, so one config works for any server.
 
-Source of truth: ../snapshot-ru-clean.json  (services: slug, category, domains,
+Two outputs, identical routing, different DNS:
+  split.conf          — PUBLIC (lives on GitHub): Cloudflare/Google DoH, no secrets.
+  split-private.conf  — PRIVATE (secret gist, share with friends only): our DoH
+                        (dnsdist->unbound on baton) as primary, Cloudflare fallback.
+
+Source of truth: ../snapshot-ru-clean.json (services: slug, category, domains,
 cidr4, cidr6 — RU-allocated ranges already subtracted).
-
-Output: split.conf  (self-contained; blocked services -> PROXY, FINAL DIRECT)
-        blocked-services.list  (flat IP-CIDR set, kept for the RULE-SET variant)
-
-Usage: python3 sr/build_sr.py   (run from repo root or sr/)
 """
 import json, os, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SNAP = os.path.join(HERE, "..", "snapshot-ru-clean.json")
-OUT_CONF = os.path.join(HERE, "split.conf")
-OUT_LIST = os.path.join(HERE, "blocked-services.list")
-UPDATE_URL = "https://raw.githubusercontent.com/baklaki52/iplist-mirror/main/sr/split.conf"
 
-snap = json.load(open(SNAP))
-services = snap.get("services", [])
-if not services:
-    sys.exit(f"{SNAP}: no services")
+# our DoH endpoint (token is a path secret; kept out of the public repo)
+OUR_DOH = "https://baton.telescope.cv:8443/340ff56150a3b88f/dns-query"
 
-GENERAL = """# Shadowrocket — SPLIT (self-contained, ip-list proxy)
+DNS_PUBLIC = """# Шифрованный DNS (Cloudflare + Google DoH/DoT) — провайдер не видит/не подменяет.
+dns-server = https://security.cloudflare-dns.com/dns-query,tls://1.1.1.2,tls://1.0.0.2,https://dns.google/dns-query,tls://8.8.8.8
+fallback-dns-server = tls://77.88.8.88,77.88.8.88,system"""
+
+DNS_PRIVATE = """# Наш DoH (unbound на baton, анти-деанон) — DNS на нашем IP. Fallback Cloudflare/Google.
+dns-server = %s
+fallback-dns-server = https://security.cloudflare-dns.com/dns-query,tls://1.1.1.2,https://dns.google/dns-query,system""" % OUR_DOH
+
+
+def general(title, dns_block, update_url):
+    return f"""# Shadowrocket — {title}
 # Per-service: DOMAIN-SUFFIX -> PROXY, then exact RU-subtracted IP-CIDR -> PROXY.
 # Прокси берётся из VLESS-подписки (политика PROXY). Своего [Proxy] тут нет.
 # Add by URL: Config -> "+" -> Download from URL. Auto-updates via update-url.
@@ -38,10 +42,7 @@ GENERAL = """# Shadowrocket — SPLIT (self-contained, ip-list proxy)
 bypass-system = true
 skip-proxy = 192.168.0.0/16, 10.0.0.0/8, 172.16.0.0/12, localhost, *.local, captive.apple.com
 tun-excluded-routes = 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.0.0.0/24, 192.0.2.0/24, 192.88.99.0/24, 192.168.0.0/16, 198.51.100.0/24, 203.0.113.0/24, 224.0.0.0/4, 255.255.255.255/32, 239.255.255.250/32
-# Наш DoH (unbound на baton, рекурсивный, анти-деанон) — DNS на нашем IP, никто не видит.
-# Fallback на Cloudflare/Google DoH, если наш сервер недоступен с сети устройства.
-dns-server = https://baton.telescope.cv:8443/340ff56150a3b88f/dns-query
-fallback-dns-server = https://security.cloudflare-dns.com/dns-query,tls://1.1.1.2,https://dns.google/dns-query,system
+{dns_block}
 ipv6 = true
 prefer-ipv6 = false
 dns-direct-system = false
@@ -51,65 +52,62 @@ icmp-auto-reply = true
 always-reject-url-rewrite = false
 private-ip-answer = true
 udp-policy-not-supported-behaviour = REJECT
-update-url = %s
+update-url = {update_url}
 
-[Rule]
-""" % UPDATE_URL
+[Rule]"""
 
-lines = [GENERAL.rstrip("\n")]
-all_cidrs, seen_cidr = [], set()
+snap = json.load(open(SNAP))
+services = snap.get("services", [])
+if not services:
+    sys.exit(f"{SNAP}: no services")
+
+# build the shared rule body once
+rule_lines = []
+all_cidrs, seen = [], set()
 n_dom = n_v4 = n_v6 = 0
-
 for svc in sorted(services, key=lambda s: (s.get("category", ""), s.get("slug", ""))):
-    slug = svc.get("slug", "")
-    cat = svc.get("category", "")
     domains = sorted(set(d.strip() for d in svc.get("domains", []) if d.strip()))
     v4 = [c.strip() for c in svc.get("cidr4", []) if c.strip()]
     v6 = [c.strip() for c in svc.get("cidr6", []) if c.strip()]
     if not (domains or v4 or v6):
         continue
-    lines.append("")
-    lines.append(f"# {slug} ({cat})")
+    rule_lines.append("")
+    rule_lines.append(f"# {svc.get('slug','')} ({svc.get('category','')})")
     for d in domains:
-        lines.append(f"DOMAIN-SUFFIX,{d},PROXY")
-        n_dom += 1
+        rule_lines.append(f"DOMAIN-SUFFIX,{d},PROXY"); n_dom += 1
     for c in v4:
-        lines.append(f"IP-CIDR,{c},PROXY,no-resolve")
-        n_v4 += 1
-        if c not in seen_cidr:
-            seen_cidr.add(c); all_cidrs.append(c)
+        rule_lines.append(f"IP-CIDR,{c},PROXY,no-resolve"); n_v4 += 1
+        if c not in seen: seen.add(c); all_cidrs.append(c)
     for c in v6:
-        lines.append(f"IP-CIDR6,{c},PROXY,no-resolve")
-        n_v6 += 1
-        if c not in seen_cidr:
-            seen_cidr.add(c); all_cidrs.append(c)
+        rule_lines.append(f"IP-CIDR6,{c},PROXY,no-resolve"); n_v6 += 1
+        if c not in seen: seen.add(c); all_cidrs.append(c)
 
-# tail: LAN direct, default direct, host map
-lines += [
-    "",
-    "# LAN",
-    "IP-CIDR,192.168.0.0/16,DIRECT",
-    "IP-CIDR,10.0.0.0/8,DIRECT",
-    "IP-CIDR,172.16.0.0/12,DIRECT",
-    "IP-CIDR,127.0.0.0/8,DIRECT",
-    "",
-    "FINAL,DIRECT",
-    "",
-    "[Host]",
-    "localhost = 127.0.0.1",
-    "",
+TAIL = [
+    "", "# LAN",
+    "IP-CIDR,192.168.0.0/16,DIRECT", "IP-CIDR,10.0.0.0/8,DIRECT",
+    "IP-CIDR,172.16.0.0/12,DIRECT", "IP-CIDR,127.0.0.0/8,DIRECT",
+    "", "FINAL,DIRECT", "", "[Host]", "localhost = 127.0.0.1", "",
 ]
-open(OUT_CONF, "w").write("\n".join(lines))
 
-# flat list (RULE-SET variant), deduped
-hdr = [
-    "# blocked-services.list — flat RU-subtracted CIDR set from snapshot-ru-clean.json",
-    f"# {len(all_cidrs)} CIDRs",
-    "# Policy + no-resolve come from the RULE-SET reference in the .conf",
-]
-body = [f"IP-CIDR6,{c}" if ":" in c else f"IP-CIDR,{c}" for c in all_cidrs]
-open(OUT_LIST, "w").write("\n".join(hdr + body) + "\n")
 
-print(f"split.conf: {n_dom} domains + {n_v4} v4 + {n_v6} v6 across "
-      f"{sum(1 for s in services if s.get('domains') or s.get('cidr4') or s.get('cidr6'))} services")
+def write(path, title, dns_block, update_url):
+    body = [general(title, dns_block, update_url)] + rule_lines + TAIL
+    open(path, "w").write("\n".join(body))
+
+
+write(os.path.join(HERE, "split.conf"), "SPLIT (public, Cloudflare DNS)", DNS_PUBLIC,
+      "https://raw.githubusercontent.com/baklaki52/iplist-mirror/main/sr/split.conf")
+# private: update-url set after the secret gist exists; empty -> SR just won't auto-update
+write(os.path.join(HERE, "split-private.conf"), "SPLIT (private, our DoH)", DNS_PRIVATE,
+      os.environ.get("PRIVATE_UPDATE_URL", "https://baton.telescope.cv/sr/split-private.conf"))
+
+# flat list for the RULE-SET variant
+hdr = ["# blocked-services.list — flat RU-subtracted CIDR set from snapshot-ru-clean.json",
+       f"# {len(all_cidrs)} CIDRs",
+       "# Policy + no-resolve come from the RULE-SET reference in the .conf"]
+flat = [f"IP-CIDR6,{c}" if ":" in c else f"IP-CIDR,{c}" for c in all_cidrs]
+open(os.path.join(HERE, "blocked-services.list"), "w").write("\n".join(hdr + flat) + "\n")
+
+print(f"split.conf (public, CF DNS) + split-private.conf (our DoH): "
+      f"{n_dom} domains + {n_v4} v4 + {n_v6} v6")
 print(f"blocked-services.list: {len(all_cidrs)} unique CIDRs")
