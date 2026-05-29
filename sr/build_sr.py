@@ -38,10 +38,10 @@ GENERAL = """# Shadowrocket — SPLIT (self-contained, ip-list proxy)
 bypass-system = true
 skip-proxy = 192.168.0.0/16, 10.0.0.0/8, 172.16.0.0/12, localhost, *.local, captive.apple.com
 tun-excluded-routes = 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.0.0.0/24, 192.0.2.0/24, 192.88.99.0/24, 192.168.0.0/16, 198.51.100.0/24, 203.0.113.0/24, 224.0.0.0/4, 255.255.255.255/32, 239.255.255.250/32
-# Шифрованный DNS (Cloudflare + Google, DoH/DoT) — провайдер (МГТС и т.п.) не видит
-# и не подменяет запросы, заблокированные домены резолвятся честно. НЕ системный.
-dns-server = https://security.cloudflare-dns.com/dns-query,tls://1.1.1.2,tls://1.0.0.2,https://dns.google/dns-query,tls://8.8.8.8,tls://8.8.4.4
-fallback-dns-server = tls://77.88.8.88,77.88.8.88,system
+# Наш DoH (unbound на baton, рекурсивный, анти-деанон) — DNS на нашем IP, никто не видит.
+# Fallback на Cloudflare/Google DoH, если наш сервер недоступен с сети устройства.
+dns-server = https://baton.telescope.cv:8443/340ff56150a3b88f/dns-query
+fallback-dns-server = https://security.cloudflare-dns.com/dns-query,tls://1.1.1.2,https://dns.google/dns-query,system
 ipv6 = true
 prefer-ipv6 = false
 dns-direct-system = false
