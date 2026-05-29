@@ -21,8 +21,10 @@ import json, os, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 SNAP = os.path.join(HERE, "..", "snapshot-ru-clean.json")
 
-# our DoH endpoint (token is a path secret; kept out of the public repo)
-OUR_DOH = "https://baton.telescope.cv:8443/340ff56150a3b88f/dns-query"
+# our DoH endpoint (token is a path secret; kept out of the public repo).
+# Goes via the rus relay (dns.telescope.cv -> 85.204.240.39 -> baton:8443) so it
+# resolves & connects from RU home/mobile nets where baton's own IP is throttled.
+OUR_DOH = "https://dns.telescope.cv:8853/340ff56150a3b88f/dns-query"
 
 DNS_PUBLIC = """# Шифрованный DNS (Cloudflare + Google DoH/DoT) — провайдер не видит/не подменяет.
 dns-server = https://security.cloudflare-dns.com/dns-query,tls://1.1.1.2,tls://1.0.0.2,https://dns.google/dns-query,tls://8.8.8.8
