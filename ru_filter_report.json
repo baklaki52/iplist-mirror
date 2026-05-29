@@ -1,5 +1,5 @@
 {
-  "applied_at": "2026-05-29T08:29:17Z",
+  "applied_at": "2026-05-29T08:40:15Z",
   "by_category": {
     "ai": {
       "services_touched": 1,
@@ -26,6 +26,13 @@
       "services_touched": 1,
       "v4_addresses_removed": 4096,
       "v4_removed_prefix_count": 1,
+      "v6_addresses_removed": 0,
+      "v6_removed_prefix_count": 0
+    },
+    "hosting": {
+      "services_touched": 1,
+      "v4_addresses_removed": 1280,
+      "v4_removed_prefix_count": 2,
       "v6_addresses_removed": 0,
       "v6_removed_prefix_count": 0
     },
@@ -136,6 +143,15 @@
         "2a11:27c0::/32"
       ],
       "slug": "bestchange.ru"
+    },
+    {
+      "category": "hosting",
+      "removed_v4": [
+        "83.136.235.0/24",
+        "91.218.244.0/22"
+      ],
+      "removed_v6": [],
+      "slug": "bitninja.com"
     },
     {
       "category": "ai",
@@ -764,9 +780,9 @@
     }
   ],
   "totals": {
-    "services_touched": 38,
-    "v4_addresses_removed": 220884456,
-    "v4_removed_prefix_count": 338,
+    "services_touched": 39,
+    "v4_addresses_removed": 220885736,
+    "v4_removed_prefix_count": 340,
     "v6_addresses_removed": 3436533714093636444210553946112,
     "v6_removed_prefix_count": 35
   }
