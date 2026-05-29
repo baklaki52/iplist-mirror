@@ -9,8 +9,10 @@
 # - Empty categories return "{}" (2 bytes) — tolerated, not an error.
 #
 # Behaviour:
-# - 18 categories from upstream (sorted by slug), incl. `ai` (chatgpt, claude,
-#   gemini, grok, perplexity, deepseek, copilot…) — services that geo-block RU.
+# - Categories are DISCOVERED dynamically from the upstream group list
+#   (rekryt/iplist config), minus `casino` (forbidden). Static fallback if
+#   discovery fails. This kills the silent-drop bug: a hardcoded list let
+#   opencck's `ai`/`finance`/`hosting` groups go unfetched for months.
 # - Per-request: 3 retries × 60s timeout; failure aborts (no partial snapshot).
 # - Merges into snapshot.json at schema_version=1, services sorted by slug.
 # - Emits snapshot.sha256 (hex only, no filename).
@@ -21,10 +23,11 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-CATEGORIES=(
-  ai tools search news video youtube socials
-  messengers music shop education art anime
-  games jetbrains discord torrent porn
+# Fallback if upstream group discovery fails — kept in sync with rekryt/iplist
+# config (minus `casino`). NOT the source of truth; discover_categories() is.
+STATIC_CATEGORIES=(
+  ai anime art discord education finance games hosting jetbrains
+  messengers music news porn shop socials tools torrent video youtube
 )
 DATA_KINDS=(cidr4 cidr6 domains dns)
 
@@ -33,6 +36,28 @@ UA="iplist-mirror-bot/1.0 (+https://github.com/baklaki52/iplist-mirror)"
 RAW_DIR="$(mktemp -d)"
 SERVICES_TMP="$(mktemp)"
 trap 'rm -rf "$RAW_DIR" "$SERVICES_TMP"' EXIT
+
+# Discover the upstream group list from rekryt/iplist (the project opencck
+# mirrors). Each group is a config directory. Excludes `casino` (forbidden).
+# Empty/garbage -> non-zero so the caller falls back to STATIC_CATEGORIES.
+discover_categories() {
+  local json
+  json="$(curl -sfL --max-time 30 -A "$UA" \
+    "https://api.github.com/repos/rekryt/iplist/contents/config")" || return 1
+  printf '%s' "$json" \
+    | jq -r '.[]?.name' 2>/dev/null \
+    | grep -E '^[a-z0-9_]+$' \
+    | grep -vx casino
+}
+
+CATEGORIES=()
+if disc="$(discover_categories)" && [ "$(printf '%s\n' "$disc" | grep -c .)" -ge 15 ]; then
+  mapfile -t CATEGORIES <<<"$disc"
+  echo "categories: discovered ${#CATEGORIES[@]} upstream groups (excl. casino)"
+else
+  CATEGORIES=("${STATIC_CATEGORIES[@]}")
+  echo "categories: discovery failed — ${#CATEGORIES[@]} static fallback groups" >&2
+fi
 
 fetch_one() {
   local cat="$1" kind="$2" out="$3"
