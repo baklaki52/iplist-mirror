@@ -106,6 +106,17 @@ for svc in sorted(services, key=lambda s: (s.get("category", ""), s.get("slug", 
         rule_lines.append(f"IP-CIDR6,{c},PROXY,no-resolve"); n_v6 += 1
         seen.add(c); all_cidrs.append(c)
 
+# Extras opencck doesn't track (its scope is censored services, not tooling):
+# speed-test endpoints, so a speed test measures the VPN instead of silently
+# falling to FINAL,DIRECT and testing the bypassed link.
+_EXTRAS = ["speedtest.net", "ookla.com", "ooklaserver.net", "speedtestcustom.com",
+           "fast.com", "speed.cloudflare.com"]
+rule_lines.append("")
+rule_lines.append("# extras (our addition, not in opencck): speedtest / diagnostics")
+for d in _EXTRAS:
+    if d not in seen_dom and not _redundant(d):
+        rule_lines.append(f"DOMAIN-SUFFIX,{d},PROXY"); n_dom += 1; seen_dom.add(d)
+
 TAIL = [
     "", "# LAN",
     "IP-CIDR,192.168.0.0/16,DIRECT", "IP-CIDR,10.0.0.0/8,DIRECT",
