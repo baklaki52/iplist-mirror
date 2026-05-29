@@ -29,8 +29,8 @@ Examples:
     ./scripts/diff_snapshots.py 5029906 HEAD
 
 Exit codes:
-    0 = identical or only additions (safe)
-    1 = removals OR critical IP regression detected
+    0 = safe to publish (additions, or normal removals with critical IPs intact)
+    1 = critical IP regression, or catastrophic (>50%) v4 loss
     2 = bad arguments / unable to load snapshots
 
 Stdlib only.
@@ -181,9 +181,15 @@ def diff(before: dict, after: dict) -> tuple[int, list[str]]:
     )
 
     out.append("")
-    out.append(f"─── removed (only in BEFORE): v4={len(removed_v4)} v6={len(removed_v6)} ───")
-    if removed_v4:
+    out.append(f"─── removed (only in BEFORE): v4={len(removed_v4)} v6={len(removed_v6)} — warning, non-blocking ───")
+    # Removals are normal upstream churn (ASN reshuffles, per-service flux) and do NOT
+    # block publishing on their own — otherwise one wobble freezes the mirror for weeks.
+    # The critical-IP health-check below is the real gate. Only a catastrophic mass-loss
+    # (>50% of unique v4 CIDRs) is treated as a regression here.
+    if removed_v4 and len(bv4) and len(av4) < len(bv4) * 0.5:
         exit_code = max(exit_code, 1)
+        out.append(f"  ❌ CATASTROPHIC: v4 {len(bv4)} → {len(av4)} (>50% loss) — blocking publish")
+    if removed_v4:
         # Sort by network size first (broader = more impactful)
         sortable = []
         for c in removed_v4:
@@ -312,7 +318,7 @@ def diff(before: dict, after: dict) -> tuple[int, list[str]]:
     if exit_code == 0:
         out.append("VERDICT: ✅ no regression detected")
     else:
-        out.append("VERDICT: ❌ regression — see removed CIDRs and critical IP block above")
+        out.append("VERDICT: ❌ regression — critical IP lost coverage or catastrophic v4 loss (see above)")
 
     return exit_code, out
 
@@ -364,7 +370,8 @@ def main(argv=None):
             )
         print(json.dumps(report, ensure_ascii=False, indent=2))
         ec = 0
-        if any(c["regression"] for c in report["critical_ip_check"]) or report["removed_v4"]:
+        catastrophic = bool(len(bv4)) and len(av4) < len(bv4) * 0.5
+        if any(c["regression"] for c in report["critical_ip_check"]) or catastrophic:
             ec = 1
         return ec
 
