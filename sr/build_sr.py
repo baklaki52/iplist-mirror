@@ -1,48 +1,111 @@
 #!/usr/bin/env python3
 """
-build_sr.py — emit Shadowrocket RULE-SET list from the iplist-mirror snapshot.
+build_sr.py — emit a self-contained Shadowrocket config from the iplist-mirror snapshot.
 
-Source of truth is the repo's RU-subtracted flat CIDR list, NOT a server file:
-    all-cidrs-ru-clean.json  (full catalog of all blocked services, minus
-                              RU-allocated ranges so Russian traffic goes direct)
+Reproduces the proven "ip-list proxy" layout: one [Rule] section grouped per
+service, each block = a `# slug (category)` comment, then all DOMAIN-SUFFIX
+rules (-> PROXY), then all IP-CIDR / IP-CIDR6 rules (-> PROXY, no-resolve).
+Everything inlined — domains AND the exact RU-subtracted CIDR set — so routing
+is as precise as the catalog allows. The proxy itself comes from the user's
+VLESS subscription (PROXY policy); no [Proxy] server is embedded.
 
-Unlike AmneziaWG AllowedIPs (capped by the iOS NetworkExtension memory limit),
-a Shadowrocket RULE-SET is fetched by URL and matched rule-by-rule — no route
-table, no memory cap. So we ship the FULL, most precise set, not a subset.
+Source of truth: ../snapshot-ru-clean.json  (services: slug, category, domains,
+cidr4, cidr6 — RU-allocated ranges already subtracted).
 
-Output: blocked-services.list  (IP-CIDR / IP-CIDR6 lines, no policy — the
-        policy + no-resolve come from the RULE-SET reference in the .conf)
+Output: split.conf  (self-contained; blocked services -> PROXY, FINAL DIRECT)
+        blocked-services.list  (flat IP-CIDR set, kept for the RULE-SET variant)
 
-Usage:
-    python3 build_sr.py [source.json] [out.list]
-Defaults: ../all-cidrs-ru-clean.json -> blocked-services.list
-Run from the sr/ directory (or pass explicit paths).
+Usage: python3 sr/build_sr.py   (run from repo root or sr/)
 """
 import json, os, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-src = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "..", "all-cidrs-ru-clean.json")
-out = sys.argv[2] if len(sys.argv) > 2 else os.path.join(HERE, "blocked-services.list")
+SNAP = os.path.join(HERE, "..", "snapshot-ru-clean.json")
+OUT_CONF = os.path.join(HERE, "split.conf")
+OUT_LIST = os.path.join(HERE, "blocked-services.list")
+UPDATE_URL = "https://raw.githubusercontent.com/baklaki52/iplist-mirror/main/sr/split.conf"
 
-cidrs = json.load(open(src))
-if not isinstance(cidrs, list):
-    sys.exit(f"{src}: expected a JSON array of CIDRs")
+snap = json.load(open(SNAP))
+services = snap.get("services", [])
+if not services:
+    sys.exit(f"{SNAP}: no services")
 
-# dedup, preserve order
-seen, ordered = set(), []
-for c in cidrs:
-    c = (c or "").strip()
-    if c and c not in seen:
-        seen.add(c); ordered.append(c)
+GENERAL = """# Shadowrocket — SPLIT (self-contained, ip-list proxy)
+# Per-service: DOMAIN-SUFFIX -> PROXY, then exact RU-subtracted IP-CIDR -> PROXY.
+# Прокси берётся из VLESS-подписки (политика PROXY). Своего [Proxy] тут нет.
+# Add by URL: Config -> "+" -> Download from URL. Auto-updates via update-url.
+[General]
+bypass-system = true
+skip-proxy = 192.168.0.0/16, 10.0.0.0/8, 172.16.0.0/12, localhost, *.local, captive.apple.com
+tun-excluded-routes = 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.0.0.0/24, 192.0.2.0/24, 192.88.99.0/24, 192.168.0.0/16, 198.51.100.0/24, 203.0.113.0/24, 224.0.0.0/4, 255.255.255.255/32, 239.255.255.250/32
+dns-server = system
+ipv6 = true
+prefer-ipv6 = false
+dns-direct-system = false
+icmp-auto-reply = true
+always-reject-url-rewrite = false
+private-ip-answer = true
+dns-direct-fallback-proxy = true
+udp-policy-not-supported-behaviour = REJECT
+update-url = %s
 
-v4 = sum(1 for c in ordered if ":" not in c)
-v6 = sum(1 for c in ordered if ":" in c)
-header = [
-    "# blocked-services.list — full RU-subtracted CIDR set from iplist-mirror",
-    "# Source: all-cidrs-ru-clean.json (all blocked services, minus RU-allocated)",
-    f"# {len(ordered)} CIDRs ({v4} v4 + {v6} v6)",
+[Rule]
+""" % UPDATE_URL
+
+lines = [GENERAL.rstrip("\n")]
+all_cidrs, seen_cidr = [], set()
+n_dom = n_v4 = n_v6 = 0
+
+for svc in sorted(services, key=lambda s: (s.get("category", ""), s.get("slug", ""))):
+    slug = svc.get("slug", "")
+    cat = svc.get("category", "")
+    domains = sorted(set(d.strip() for d in svc.get("domains", []) if d.strip()))
+    v4 = [c.strip() for c in svc.get("cidr4", []) if c.strip()]
+    v6 = [c.strip() for c in svc.get("cidr6", []) if c.strip()]
+    if not (domains or v4 or v6):
+        continue
+    lines.append("")
+    lines.append(f"# {slug} ({cat})")
+    for d in domains:
+        lines.append(f"DOMAIN-SUFFIX,{d},PROXY")
+        n_dom += 1
+    for c in v4:
+        lines.append(f"IP-CIDR,{c},PROXY,no-resolve")
+        n_v4 += 1
+        if c not in seen_cidr:
+            seen_cidr.add(c); all_cidrs.append(c)
+    for c in v6:
+        lines.append(f"IP-CIDR6,{c},PROXY,no-resolve")
+        n_v6 += 1
+        if c not in seen_cidr:
+            seen_cidr.add(c); all_cidrs.append(c)
+
+# tail: LAN direct, default direct, host map
+lines += [
+    "",
+    "# LAN",
+    "IP-CIDR,192.168.0.0/16,DIRECT",
+    "IP-CIDR,10.0.0.0/8,DIRECT",
+    "IP-CIDR,172.16.0.0/12,DIRECT",
+    "IP-CIDR,127.0.0.0/8,DIRECT",
+    "",
+    "FINAL,DIRECT",
+    "",
+    "[Host]",
+    "localhost = 127.0.0.1",
+    "",
+]
+open(OUT_CONF, "w").write("\n".join(lines))
+
+# flat list (RULE-SET variant), deduped
+hdr = [
+    "# blocked-services.list — flat RU-subtracted CIDR set from snapshot-ru-clean.json",
+    f"# {len(all_cidrs)} CIDRs",
     "# Policy + no-resolve come from the RULE-SET reference in the .conf",
 ]
-body = [f"IP-CIDR6,{c}" if ":" in c else f"IP-CIDR,{c}" for c in ordered]
-open(out, "w").write("\n".join(header + body) + "\n")
-print(f"wrote {out}: {len(body)} rules ({v4} v4 + {v6} v6)")
+body = [f"IP-CIDR6,{c}" if ":" in c else f"IP-CIDR,{c}" for c in all_cidrs]
+open(OUT_LIST, "w").write("\n".join(hdr + body) + "\n")
+
+print(f"split.conf: {n_dom} domains + {n_v4} v4 + {n_v6} v6 across "
+      f"{sum(1 for s in services if s.get('domains') or s.get('cidr4') or s.get('cidr6'))} services")
+print(f"blocked-services.list: {len(all_cidrs)} unique CIDRs")
