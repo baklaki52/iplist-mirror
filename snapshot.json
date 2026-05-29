@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-05-29T08:17:02Z",
+  "generated_at": "2026-05-29T08:29:12Z",
   "source": "rekryt/iplist via iplist.opencck.org",
   "source_tag": "v20260529",
   "services": [
@@ -3017,6 +3017,7 @@
         "api.claude.ai",
         "api.console.anthropic.com",
         "claude.ai",
+        "claude.com",
         "claudeusercontent.com",
         "console.anthropic.com",
         "downloads.intercomcdn.com",
@@ -3031,6 +3032,7 @@
         "widget.intercom.io",
         "www.anthropic.com",
         "www.claude.ai",
+        "www.claude.com",
         "www.claudeusercontent.com",
         "www.intercom.io"
       ],
@@ -43750,7 +43752,7 @@
     }
   ],
   "asn_overlay": {
-    "applied_at": "2026-05-29T08:17:05Z",
+    "applied_at": "2026-05-29T08:29:14Z",
     "tool": "bgpq4",
     "entries": [
       {
@@ -43787,6 +43789,10 @@
         "v6_added": 50,
         "v4_total": 113,
         "v6_total": 51
+      },
+      {
+        "slug": "claude.ai",
+        "domains_added": 2
       }
     ]
   }
