@@ -632,7 +632,10 @@ def _load_ordered_ips():
 
 def _load_priority_ips():
     """Load allowed_ips_priority.json → {"v4":[...], "v6":[...]}.
-    Critical services pinned to the front of AllowedIPs. Empty if file missing."""
+    Critical services pinned to the front of AllowedIPs. Empty if file missing.
+
+    Legacy format. New consumers should prefer _load_priority_flat() which
+    returns a per-service v4+v6 adjacent flat list."""
     try:
         with open(BASE_DIR / "allowed_ips_priority.json") as f:
             d = json.load(f)
@@ -646,6 +649,25 @@ def _load_priority_ips():
                 return {"v4": d.get("v4", []), "v6": d.get("v6", [])}
         except Exception:
             return {"v4": [], "v6": []}
+
+
+def _load_priority_flat():
+    """Load allowed_ips_priority_flat.json — single flat list with v4+v6 of
+    each priority service adjacent (the iOS NE / AWG-safe order).
+    Returns [] if missing — caller falls back to _load_priority_ips()."""
+    try:
+        with open(BASE_DIR / "allowed_ips_priority_flat.json") as f:
+            d = json.load(f)
+            return d if isinstance(d, list) else []
+    except (FileNotFoundError, json.JSONDecodeError, NameError):
+        try:
+            import os
+            p = os.path.join(os.path.dirname(__file__), "allowed_ips_priority_flat.json")
+            with open(p) as f:
+                d = json.load(f)
+                return d if isinstance(d, list) else []
+        except Exception:
+            return []
 
 
 def generate_client_config(privkey, ip, psk, mode: str = "split", user_id=None,
@@ -689,10 +711,16 @@ def generate_client_config(privkey, ip, psk, mode: str = "split", user_id=None,
                 allowed_ips = load_allowed_ips() + v6_part
         # Prepend internal DNS route + PRIORITY HEAD (critical services pinned
         # to the front so they survive iOS NE memory pressure / app timing).
-        # Order: DNS, priority-v4, priority-v6, then the rest. Dedup preserves
-        # order — a CIDR already in the priority head won't repeat in the tail.
-        _pri = _load_priority_ips()
-        _head = [f"{DNS_IP}/32"] + _pri["v4"] + _pri["v6"]
+        # Per-service v4+v6 adjacent — prefer the new flat file; fall back to
+        # the legacy dict (flat-by-family, v4 block then v6 block) if not yet
+        # generated. Dedup preserves order — a CIDR already in the priority
+        # head won't repeat in the tail.
+        _pri_flat = _load_priority_flat()
+        if _pri_flat:
+            _head = [f"{DNS_IP}/32"] + _pri_flat
+        else:
+            _pri = _load_priority_ips()
+            _head = [f"{DNS_IP}/32"] + _pri["v4"] + _pri["v6"]
         _seen, _ordered = set(), []
         for _c in _head + [x.strip() for x in allowed_ips.split(",")]:
             _c = _c.strip()

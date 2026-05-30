@@ -334,7 +334,10 @@ def _load_ordered_ips():
 
 
 def _load_priority_ips():
-    """Load allowed_ips_priority.json → {"v4":[...], "v6":[...]}; empty if missing."""
+    """Load allowed_ips_priority.json → {"v4":[...], "v6":[...]}; empty if missing.
+
+    Legacy format. New consumers should prefer _load_priority_flat() which
+    returns a per-service v4+v6 adjacent flat list."""
     import os
     try:
         p = os.path.join(os.path.dirname(os.path.abspath(__file__)), "allowed_ips_priority.json")
@@ -343,6 +346,20 @@ def _load_priority_ips():
             return {"v4": d.get("v4", []), "v6": d.get("v6", [])}
     except Exception:
         return {"v4": [], "v6": []}
+
+
+def _load_priority_flat():
+    """Load allowed_ips_priority_flat.json — single flat list with v4+v6 of
+    each priority service adjacent (the iOS NE / AWG-safe order).
+    Returns [] if missing — caller falls back to _load_priority_ips()."""
+    import os
+    try:
+        p = os.path.join(os.path.dirname(os.path.abspath(__file__)), "allowed_ips_priority_flat.json")
+        with open(p) as f:
+            d = json.load(f)
+            return d if isinstance(d, list) else []
+    except Exception:
+        return []
 
 
 def generate_client_config(privkey, client_ip, psk, mode="split", user_id=None):
@@ -370,8 +387,15 @@ def generate_client_config(privkey, client_ip, psk, mode="split", user_id=None):
             _base = load_allowed_ips() + load_allowed_ips_v6()  # fallback flat
         # PRIORITY HEAD — critical services pinned to the front (hard guarantee),
         # ordered list provides the ranked rest. v4+v6 per-service adjacent.
-        _pri = _load_priority_ips()
-        _raw = ["172.29.172.254/32"] + _pri["v4"] + _pri["v6"] + _base
+        # Prefer the new flat file (per-group adjacency); fall back to the
+        # legacy dict format if it's not generated yet.
+        _pri_flat = _load_priority_flat()
+        if _pri_flat:
+            _head = ["172.29.172.254/32"] + _pri_flat
+        else:
+            _pri = _load_priority_ips()
+            _head = ["172.29.172.254/32"] + _pri["v4"] + _pri["v6"]
+        _raw = _head + _base
         _seen = set()
         parts = []
         for _c in _raw:

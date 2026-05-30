@@ -170,44 +170,55 @@ YANDEX_V6_PREFIXES = [
 # ──────────────────────────────────────────────────────────────────────────
 # PRIORITY HEAD — top services pinned to the FRONT of AllowedIPs so they
 # survive iOS NetworkExtension memory pressure / app-side connection timing.
-# Order matters: these go first (v4), then their v6, then the rest.
-# Explicit ASN blocks because ChatGPT/Gemini live on shared Cloudflare/Google
-# ranges and cannot be isolated per-service from upstream iplist.
+# Each group = one service: v4 + v6 of that service emitted adjacent in the
+# final AllowedIPs (clients route correctly when v4/v6 of the same service
+# sit together). Explicit ASN blocks because ChatGPT/Gemini live on shared
+# Cloudflare/Google ranges and cannot be isolated per-service from upstream
+# iplist.
 # ──────────────────────────────────────────────────────────────────────────
-PRIORITY_CIDR_V4 = [
-    # ── Telegram (AS62041) ──
-    "91.108.4.0/22", "91.108.8.0/22", "91.108.12.0/22", "91.108.16.0/22",
-    "91.108.20.0/22", "91.108.56.0/22", "95.161.64.0/20",
-    "149.154.160.0/20", "149.154.164.0/22",
-    # ── Google / YouTube / Gemini (AS15169) ──
-    "8.8.4.0/24", "8.8.8.0/24", "34.0.0.0/9", "35.184.0.0/13",
-    "64.233.160.0/19", "66.102.0.0/20", "66.249.64.0/19", "72.14.192.0/18",
-    "74.125.0.0/16", "108.177.0.0/17", "142.250.0.0/15", "172.217.0.0/16",
-    "172.253.0.0/16", "173.194.0.0/16", "209.85.128.0/17", "216.58.192.0/19",
-    "216.239.32.0/19",
-    # ── Meta / WhatsApp / Instagram (+ AWS edges for WA) ──
-    "31.13.64.0/18", "57.144.0.0/14", "102.132.96.0/20", "157.240.0.0/16",
-    "163.70.128.0/17", "179.60.0.0/16", "185.60.216.0/22",
-    "3.33.128.0/17", "3.33.252.0/24", "15.197.0.0/16",
-    # ── Cloudflare (ChatGPT, Claude edge, many CDN) ──
-    "104.16.0.0/13", "104.24.0.0/14", "162.159.0.0/16", "172.64.0.0/13",
-    "188.114.96.0/20",
-    # ── Anthropic / Claude ──
-    "160.79.104.0/21",
+PRIORITY_GROUPS = [
+    ("Telegram (AS62041)", [
+        "91.108.4.0/22", "91.108.8.0/22", "91.108.12.0/22", "91.108.16.0/22",
+        "91.108.20.0/22", "91.108.56.0/22", "95.161.64.0/20",
+        "149.154.160.0/20", "149.154.164.0/22",
+    ], [
+        "2001:67c:4e8::/48", "2001:b28:f23c::/46", "2001:b28:f23f::/48",
+        "2a0a:f280::/32",
+    ]),
+    ("Google / YouTube / Gemini (AS15169)", [
+        "8.8.4.0/24", "8.8.8.0/24", "34.0.0.0/9", "35.184.0.0/13",
+        "64.233.160.0/19", "66.102.0.0/20", "66.249.64.0/19", "72.14.192.0/18",
+        "74.125.0.0/16", "108.177.0.0/17", "142.250.0.0/15", "172.217.0.0/16",
+        "172.253.0.0/16", "173.194.0.0/16", "209.85.128.0/17", "216.58.192.0/19",
+        "216.239.32.0/19",
+    ], [
+        "2607:f8b0::/32", "2800:3f0::/32", "2a00:1450::/32", "2404:6800::/32",
+        "2001:4860::/32",
+    ]),
+    ("Meta / WhatsApp / Instagram (+ AWS edges for WA)", [
+        "31.13.64.0/18", "57.144.0.0/14", "102.132.96.0/20", "157.240.0.0/16",
+        "163.70.128.0/17", "179.60.0.0/16", "185.60.216.0/22",
+        "3.33.128.0/17", "3.33.252.0/24", "15.197.0.0/16",
+    ], [
+        "2a03:2880::/29",
+    ]),
+    ("Cloudflare (ChatGPT, Claude edge, many CDN)", [
+        "104.16.0.0/13", "104.24.0.0/14", "162.159.0.0/16", "172.64.0.0/13",
+        "188.114.96.0/20",
+    ], [
+        "2606:4700::/32", "2803:f800::/32", "2405:b500::/32", "2405:8100::/32",
+        "2a06:98c0::/29",
+    ]),
+    ("Anthropic / Claude", [
+        "160.79.104.0/21",
+    ], []),
 ]
-PRIORITY_CIDR_V6 = [
-    # ── Telegram ──
-    "2001:67c:4e8::/48", "2001:b28:f23c::/46", "2001:b28:f23f::/48",
-    "2a0a:f280::/32",
-    # ── Google / YouTube / Gemini ──
-    "2607:f8b0::/32", "2800:3f0::/32", "2a00:1450::/32", "2404:6800::/32",
-    "2001:4860::/32",
-    # ── Meta / WhatsApp / Instagram ──
-    "2a03:2880::/29",
-    # ── Cloudflare (ChatGPT, Claude) ──
-    "2606:4700::/32", "2803:f800::/32", "2405:b500::/32", "2405:8100::/32",
-    "2a06:98c0::/29",
-]
+
+# Backward-compat: flat lists derived from PRIORITY_GROUPS preserve the
+# legacy allowed_ips_priority.json shape ({"v4": [...], "v6": [...]}).
+# New consumers should read allowed_ips_priority_flat.json instead.
+PRIORITY_CIDR_V4 = [c for (_l, v4, _v6) in PRIORITY_GROUPS for c in v4]
+PRIORITY_CIDR_V6 = [c for (_l, _v4, v6) in PRIORITY_GROUPS for c in v6]
 
 # ──────────────────────────────────────────────────────────────────────────
 # IO helpers
@@ -576,6 +587,23 @@ def build_outputs(services, admin_v4, admin_v6):
     priority_v4 = _in_order(PRIORITY_CIDR_V4, _pri_v4)
     priority_v6 = _in_order(PRIORITY_CIDR_V6, _pri_v6)
 
+    # Per-service flat priority head with v4+v6 of each group adjacent.
+    # This is the FIX for the iOS NE / AWG issue where Telegram was flapping
+    # because all v4 of the priority head landed at the front and v6 only
+    # appeared after them — clients route v4/v6 of the same service better
+    # when they sit adjacent in AllowedIPs.
+    _seen_flat = set()
+    priority_flat = []
+    for _label, _group_v4, _group_v6 in PRIORITY_GROUPS:
+        _g_v4 = _in_order(_group_v4,
+                          _subtract_excluded(list(_group_v4), YANDEX_V4_PREFIXES))
+        _g_v6 = _in_order(_group_v6,
+                          _subtract_excluded(list(_group_v6), YANDEX_V6_PREFIXES))
+        for _c in _g_v4 + _g_v6:
+            if _c and _c not in _seen_flat:
+                _seen_flat.add(_c)
+                priority_flat.append(_c)
+
     ordered = build_ordered(services, admin_v4, admin_v6)
 
     return {
@@ -583,6 +611,7 @@ def build_outputs(services, admin_v4, admin_v6):
         "allowed_ips_v6.json": flat_v6,
         "allowed_ips_ordered.json": ordered,
         "allowed_ips_priority.json": {"v4": priority_v4, "v6": priority_v6},
+        "allowed_ips_priority_flat.json": priority_flat,
         "allowed_ips_youtube.json": yt_v4,
         "allowed_ips_by_category.json": {
             "v4": by_cat_v4_out,
@@ -644,6 +673,8 @@ def main():
                  json.dumps(outputs["allowed_ips_ordered.json"]))
     atomic_write(BASE / "allowed_ips_priority.json",
                  json.dumps(outputs["allowed_ips_priority.json"]))
+    atomic_write(BASE / "allowed_ips_priority_flat.json",
+                 json.dumps(outputs["allowed_ips_priority_flat.json"]))
     atomic_write(BASE / "allowed_ips_v6.json",
                  json.dumps(outputs["allowed_ips_v6.json"]))
     atomic_write(BASE / "allowed_ips_youtube.json",
