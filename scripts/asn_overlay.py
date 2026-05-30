@@ -75,6 +75,21 @@ OVERLAYS = [
         "min_expected_v4": 50,
         "min_expected_v6": 0,
     },
+    {
+        # Google AS15169 — OAuth needs IP+domain consistency across the whole
+        # flow: accounts.google.com (login), oauth2.googleapis.com (token),
+        # gstatic.com (assets), googleusercontent.com (avatars). If any leg
+        # leaves the tunnel, Google sees mixed-IP session and blocks the auth
+        # callback as 'suspicious'. opencck's youtube service has SOME Google
+        # CIDRs from DNS discovery; BGP gives the full AS picture. filter_ru
+        # then subtracts RU-allocated prefixes -> Yandex/RU-edge stays direct,
+        # only foreign Google is tunneled. Domains added via DOMAIN_OVERLAYS.
+        "slug": "google.com",
+        "category": "tools",
+        "asns": ["AS15169"],
+        "min_expected_v4": 100,
+        "min_expected_v6": 20,
+    },
 ]
 
 # Domain overlays — upstream (opencck) domain lists lag service rebrandings.
@@ -88,6 +103,21 @@ DOMAIN_OVERLAYS = [
         "slug": "claude.ai",
         "category": "ai",
         "domains": ["claude.com", "www.claude.com"],
+    },
+    {
+        # Google OAuth: pair these domains with the AS15169 CIDRs above so SR
+        # routes them by name (before resolve) and AWG by IP. Together: full
+        # auth-flow consistency under one tunnel egress -> Google stops flagging
+        # mixed-IP sessions.
+        "slug": "google.com",
+        "category": "tools",
+        "domains": [
+            "accounts.google.com",
+            "googleapis.com",
+            "gstatic.com",
+            "googleusercontent.com",
+            "firebaseapp.com",
+        ],
     },
 ]
 
