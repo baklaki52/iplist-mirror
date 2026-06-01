@@ -1,5 +1,5 @@
 {
-  "applied_at": "2026-05-31T06:55:30Z",
+  "applied_at": "2026-06-01T08:29:41Z",
   "by_category": {
     "ai": {
       "services_touched": 1,
@@ -754,8 +754,8 @@
       "slug": "yummyanime.tv"
     }
   ],
-  "ru_v4_prefix_count": 8614,
-  "ru_v6_prefix_count": 2183,
+  "ru_v4_prefix_count": 9253,
+  "ru_v6_prefix_count": 2191,
   "schema_version": 1,
   "sources": [
     {
@@ -769,14 +769,14 @@
     {
       "repo": "russia.iplist.opencck.org",
       "restriction": "fully-within-ipverse-ru-only",
-      "status": "fetch_failed: GET https://russia.iplist.opencck.org/?format=text&data=cidr4&group=russia failed after 3 attempts: HTTP Error 502: Bad Gateway",
-      "v4_prefix_count": 0,
-      "v4_raw_prefix_count": 0,
-      "v4_skipped_outside_ripe_ru": 0,
+      "status": "ok",
+      "v4_prefix_count": 774,
+      "v4_raw_prefix_count": 958,
+      "v4_skipped_outside_ripe_ru": 184,
       "v4_url": "https://russia.iplist.opencck.org/?format=text&data=cidr4&group=russia",
-      "v6_prefix_count": 0,
-      "v6_raw_prefix_count": 0,
-      "v6_skipped_outside_ripe_ru": 0,
+      "v6_prefix_count": 12,
+      "v6_raw_prefix_count": 25,
+      "v6_skipped_outside_ripe_ru": 13,
       "v6_url": "https://russia.iplist.opencck.org/?format=text&data=cidr6&group=russia"
     }
   ],
