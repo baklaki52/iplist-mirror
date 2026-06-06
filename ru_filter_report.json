@@ -1,5 +1,5 @@
 {
-  "applied_at": "2026-06-04T07:23:05Z",
+  "applied_at": "2026-06-06T06:23:49Z",
   "by_category": {
     "ai": {
       "services_touched": 1,
@@ -59,8 +59,8 @@
     },
     "shop": {
       "services_touched": 1,
-      "v4_addresses_removed": 17913696,
-      "v4_removed_prefix_count": 180,
+      "v4_addresses_removed": 17919200,
+      "v4_removed_prefix_count": 184,
       "v6_addresses_removed": 0,
       "v6_removed_prefix_count": 0
     },
@@ -471,6 +471,7 @@
         "37.193.112.0/21",
         "37.204.192.0/18",
         "45.8.249.0/24",
+        "45.90.45.0/24",
         "45.156.26.0/24",
         "46.0.192.0/21",
         "46.37.136.0/21",
@@ -483,6 +484,7 @@
         "46.163.158.0/23",
         "46.188.0.0/18",
         "51.250.0.0/17",
+        "62.84.112.0/20",
         "62.113.114.0/24",
         "62.245.48.0/20",
         "77.37.128.0/19",
@@ -495,6 +497,7 @@
         "78.36.160.0/19",
         "78.36.192.0/21",
         "78.132.128.0/18",
+        "78.153.129.128/25",
         "79.111.0.0/17",
         "79.164.208.0/20",
         "80.66.81.0/24",
@@ -533,6 +536,7 @@
         "90.188.4.0/22",
         "90.188.8.0/21",
         "90.188.24.0/21",
+        "90.188.236.0/22",
         "91.122.104.0/21",
         "91.197.204.0/22",
         "91.206.16.0/23",
@@ -756,25 +760,25 @@
       "slug": "yummyanime.tv"
     }
   ],
-  "ru_v4_prefix_count": 9258,
-  "ru_v6_prefix_count": 2190,
+  "ru_v4_prefix_count": 9261,
+  "ru_v6_prefix_count": 2192,
   "schema_version": 1,
   "sources": [
     {
       "repo": "ipverse/rir-ip",
       "status": "ok",
-      "v4_prefix_count": 8618,
+      "v4_prefix_count": 8619,
       "v4_url": "https://raw.githubusercontent.com/ipverse/rir-ip/master/country/ru/ipv4-aggregated.txt",
-      "v6_prefix_count": 2182,
+      "v6_prefix_count": 2184,
       "v6_url": "https://raw.githubusercontent.com/ipverse/rir-ip/master/country/ru/ipv6-aggregated.txt"
     },
     {
       "repo": "russia.iplist.opencck.org",
       "restriction": "fully-within-ipverse-ru-only",
       "status": "ok",
-      "v4_prefix_count": 775,
-      "v4_raw_prefix_count": 959,
-      "v4_skipped_outside_ripe_ru": 184,
+      "v4_prefix_count": 777,
+      "v4_raw_prefix_count": 962,
+      "v4_skipped_outside_ripe_ru": 185,
       "v4_url": "https://russia.iplist.opencck.org/?format=text&data=cidr4&group=russia",
       "v6_prefix_count": 12,
       "v6_raw_prefix_count": 25,
@@ -784,8 +788,8 @@
   ],
   "totals": {
     "services_touched": 39,
-    "v4_addresses_removed": 220935016,
-    "v4_removed_prefix_count": 343,
+    "v4_addresses_removed": 220940520,
+    "v4_removed_prefix_count": 347,
     "v6_addresses_removed": 3436533714093636444210553946112,
     "v6_removed_prefix_count": 35
   }
