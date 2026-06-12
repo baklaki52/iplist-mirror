@@ -1,5 +1,5 @@
 {
-  "applied_at": "2026-06-10T07:06:46Z",
+  "applied_at": "2026-06-12T07:18:04Z",
   "by_category": {
     "ai": {
       "services_touched": 1,
@@ -59,8 +59,8 @@
     },
     "shop": {
       "services_touched": 1,
-      "v4_addresses_removed": 17928416,
-      "v4_removed_prefix_count": 186,
+      "v4_addresses_removed": 17949408,
+      "v4_removed_prefix_count": 189,
       "v6_addresses_removed": 0,
       "v6_removed_prefix_count": 0
     },
@@ -500,6 +500,7 @@
         "78.132.128.0/18",
         "78.153.129.128/25",
         "79.111.0.0/17",
+        "79.120.0.0/18",
         "79.164.208.0/20",
         "80.66.81.0/24",
         "80.90.184.0/23",
@@ -571,12 +572,14 @@
         "94.137.240.0/22",
         "94.158.40.0/21",
         "94.228.112.0/22",
+        "94.231.160.0/20",
         "94.233.0.0/17",
         "94.247.111.0/24",
         "95.31.0.0/19",
         "95.79.0.0/16",
         "95.165.0.0/17",
         "95.165.128.0/17",
+        "95.183.12.0/23",
         "95.213.212.0/24",
         "109.173.64.0/18",
         "109.174.0.0/18",
@@ -763,16 +766,16 @@
       "slug": "yummyanime.tv"
     }
   ],
-  "ru_v4_prefix_count": 9262,
-  "ru_v6_prefix_count": 2193,
+  "ru_v4_prefix_count": 9264,
+  "ru_v6_prefix_count": 2194,
   "schema_version": 1,
   "sources": [
     {
       "repo": "ipverse/rir-ip",
       "status": "ok",
-      "v4_prefix_count": 8620,
+      "v4_prefix_count": 8622,
       "v4_url": "https://raw.githubusercontent.com/ipverse/rir-ip/master/country/ru/ipv4-aggregated.txt",
-      "v6_prefix_count": 2185,
+      "v6_prefix_count": 2186,
       "v6_url": "https://raw.githubusercontent.com/ipverse/rir-ip/master/country/ru/ipv6-aggregated.txt"
     },
     {
@@ -791,8 +794,8 @@
   ],
   "totals": {
     "services_touched": 39,
-    "v4_addresses_removed": 220949992,
-    "v4_removed_prefix_count": 350,
+    "v4_addresses_removed": 220970984,
+    "v4_removed_prefix_count": 353,
     "v6_addresses_removed": 3436533714093636444210553946112,
     "v6_removed_prefix_count": 35
   }
