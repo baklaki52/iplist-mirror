@@ -1,5 +1,5 @@
 {
-  "applied_at": "2026-06-12T07:18:04Z",
+  "applied_at": "2026-06-13T06:54:17Z",
   "by_category": {
     "ai": {
       "services_touched": 1,
@@ -80,7 +80,7 @@
     },
     "video": {
       "services_touched": 6,
-      "v4_addresses_removed": 16981256,
+      "v4_addresses_removed": 16983296,
       "v4_removed_prefix_count": 29,
       "v6_addresses_removed": 79228162514264337593543950336,
       "v6_removed_prefix_count": 1
@@ -258,7 +258,7 @@
     {
       "category": "video",
       "removed_v4": [
-        "95.129.233.136/29"
+        "95.129.232.0/21"
       ],
       "removed_v6": [],
       "slug": "kino.pub"
@@ -794,7 +794,7 @@
   ],
   "totals": {
     "services_touched": 39,
-    "v4_addresses_removed": 220970984,
+    "v4_addresses_removed": 220973024,
     "v4_removed_prefix_count": 353,
     "v6_addresses_removed": 3436533714093636444210553946112,
     "v6_removed_prefix_count": 35
