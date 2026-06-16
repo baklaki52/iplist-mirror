@@ -1,5 +1,5 @@
 {
-  "applied_at": "2026-06-15T08:54:49Z",
+  "applied_at": "2026-06-16T08:41:50Z",
   "by_category": {
     "ai": {
       "services_touched": 1,
@@ -59,8 +59,8 @@
     },
     "shop": {
       "services_touched": 1,
-      "v4_addresses_removed": 17949664,
-      "v4_removed_prefix_count": 190,
+      "v4_addresses_removed": 17949920,
+      "v4_removed_prefix_count": 191,
       "v6_addresses_removed": 0,
       "v6_removed_prefix_count": 0
     },
@@ -494,6 +494,7 @@
         "77.66.178.0/23",
         "77.106.0.0/19",
         "77.106.96.0/20",
+        "77.223.120.0/24",
         "78.24.180.0/24",
         "78.36.160.0/19",
         "78.36.192.0/21",
@@ -774,7 +775,7 @@
     {
       "repo": "ipverse/rir-ip",
       "status": "ok",
-      "v4_prefix_count": 8622,
+      "v4_prefix_count": 8621,
       "v4_url": "https://raw.githubusercontent.com/ipverse/rir-ip/master/country/ru/ipv4-aggregated.txt",
       "v6_prefix_count": 2186,
       "v6_url": "https://raw.githubusercontent.com/ipverse/rir-ip/master/country/ru/ipv6-aggregated.txt"
@@ -783,8 +784,8 @@
       "repo": "russia.iplist.opencck.org",
       "restriction": "fully-within-ipverse-ru-only",
       "status": "ok",
-      "v4_prefix_count": 778,
-      "v4_raw_prefix_count": 966,
+      "v4_prefix_count": 779,
+      "v4_raw_prefix_count": 967,
       "v4_skipped_outside_ripe_ru": 188,
       "v4_url": "https://russia.iplist.opencck.org/?format=text&data=cidr4&group=russia",
       "v6_prefix_count": 12,
@@ -795,8 +796,8 @@
   ],
   "totals": {
     "services_touched": 39,
-    "v4_addresses_removed": 220973280,
-    "v4_removed_prefix_count": 354,
+    "v4_addresses_removed": 220973536,
+    "v4_removed_prefix_count": 355,
     "v6_addresses_removed": 3436533714093636444210553946112,
     "v6_removed_prefix_count": 35
   }
