@@ -1,5 +1,5 @@
 {
-  "applied_at": "2026-06-18T07:30:19Z",
+  "applied_at": "2026-06-19T08:29:57Z",
   "by_category": {
     "ai": {
       "services_touched": 1,
@@ -771,7 +771,7 @@
     }
   ],
   "ru_v4_prefix_count": 9266,
-  "ru_v6_prefix_count": 2194,
+  "ru_v6_prefix_count": 2193,
   "schema_version": 1,
   "sources": [
     {
@@ -779,7 +779,7 @@
       "status": "ok",
       "v4_prefix_count": 8622,
       "v4_url": "https://raw.githubusercontent.com/ipverse/rir-ip/master/country/ru/ipv4-aggregated.txt",
-      "v6_prefix_count": 2186,
+      "v6_prefix_count": 2185,
       "v6_url": "https://raw.githubusercontent.com/ipverse/rir-ip/master/country/ru/ipv6-aggregated.txt"
     },
     {
