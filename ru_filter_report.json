@@ -1,5 +1,5 @@
 {
-  "applied_at": "2026-06-27T06:26:01Z",
+  "applied_at": "2026-06-28T06:58:14Z",
   "by_category": {
     "ai": {
       "services_touched": 1,
@@ -87,8 +87,8 @@
     },
     "video": {
       "services_touched": 6,
-      "v4_addresses_removed": 16983296,
-      "v4_removed_prefix_count": 29,
+      "v4_addresses_removed": 16983552,
+      "v4_removed_prefix_count": 30,
       "v6_addresses_removed": 79228162514264337593543950336,
       "v6_removed_prefix_count": 1
     },
@@ -170,7 +170,9 @@
     },
     {
       "category": "video",
-      "removed_v4": [],
+      "removed_v4": [
+        "141.8.192.0/24"
+      ],
       "removed_v6": [
         "2a0a:2b43::/32"
       ],
@@ -821,8 +823,8 @@
   ],
   "totals": {
     "services_touched": 40,
-    "v4_addresses_removed": 254799584,
-    "v4_removed_prefix_count": 366,
+    "v4_addresses_removed": 254799840,
+    "v4_removed_prefix_count": 367,
     "v6_addresses_removed": 3436533714093636444210553946112,
     "v6_removed_prefix_count": 35
   }
