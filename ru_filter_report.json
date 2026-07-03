@@ -1,5 +1,5 @@
 {
-  "applied_at": "2026-07-02T06:35:01Z",
+  "applied_at": "2026-07-03T06:25:23Z",
   "by_category": {
     "ai": {
       "services_touched": 1,
@@ -87,8 +87,8 @@
     },
     "video": {
       "services_touched": 6,
-      "v4_addresses_removed": 16983552,
-      "v4_removed_prefix_count": 30,
+      "v4_addresses_removed": 16983808,
+      "v4_removed_prefix_count": 31,
       "v6_addresses_removed": 79228162514264337593543950336,
       "v6_removed_prefix_count": 1
     },
@@ -171,7 +171,8 @@
     {
       "category": "video",
       "removed_v4": [
-        "141.8.192.0/24"
+        "141.8.192.0/24",
+        "193.233.63.0/24"
       ],
       "removed_v6": [
         "2a0a:2b43::/32"
@@ -799,7 +800,7 @@
       "slug": "yummyanime.tv"
     }
   ],
-  "ru_v4_prefix_count": 9270,
+  "ru_v4_prefix_count": 9276,
   "ru_v6_prefix_count": 2182,
   "schema_version": 1,
   "sources": [
@@ -815,8 +816,8 @@
       "repo": "russia.iplist.opencck.org",
       "restriction": "fully-within-ipverse-ru-only",
       "status": "ok",
-      "v4_prefix_count": 779,
-      "v4_raw_prefix_count": 970,
+      "v4_prefix_count": 785,
+      "v4_raw_prefix_count": 976,
       "v4_skipped_outside_ripe_ru": 191,
       "v4_url": "https://russia.iplist.opencck.org/?format=text&data=cidr4&group=russia",
       "v6_prefix_count": 12,
@@ -827,8 +828,8 @@
   ],
   "totals": {
     "services_touched": 40,
-    "v4_addresses_removed": 254870496,
-    "v4_removed_prefix_count": 371,
+    "v4_addresses_removed": 254870752,
+    "v4_removed_prefix_count": 372,
     "v6_addresses_removed": 3436533714093636444210553946112,
     "v6_removed_prefix_count": 35
   }
