@@ -1,5 +1,5 @@
 {
-  "applied_at": "2026-07-03T06:25:23Z",
+  "applied_at": "2026-07-04T06:13:49Z",
   "by_category": {
     "ai": {
       "services_touched": 1,
@@ -59,8 +59,8 @@
     },
     "shop": {
       "services_touched": 1,
-      "v4_addresses_removed": 35069408,
-      "v4_removed_prefix_count": 205,
+      "v4_addresses_removed": 35070432,
+      "v4_removed_prefix_count": 206,
       "v6_addresses_removed": 0,
       "v6_removed_prefix_count": 0
     },
@@ -503,6 +503,7 @@
         "46.148.128.0/20",
         "46.160.198.0/24",
         "46.163.158.0/23",
+        "46.163.164.0/22",
         "46.188.0.0/18",
         "51.250.0.0/17",
         "62.84.112.0/20",
@@ -828,8 +829,8 @@
   ],
   "totals": {
     "services_touched": 40,
-    "v4_addresses_removed": 254870752,
-    "v4_removed_prefix_count": 372,
+    "v4_addresses_removed": 254871776,
+    "v4_removed_prefix_count": 373,
     "v6_addresses_removed": 3436533714093636444210553946112,
     "v6_removed_prefix_count": 35
   }
