@@ -1,5 +1,5 @@
 {
-  "applied_at": "2026-07-06T07:05:35Z",
+  "applied_at": "2026-07-07T06:41:25Z",
   "by_category": {
     "ai": {
       "services_touched": 1,
@@ -59,8 +59,8 @@
     },
     "shop": {
       "services_touched": 1,
-      "v4_addresses_removed": 35071200,
-      "v4_removed_prefix_count": 208,
+      "v4_addresses_removed": 35072224,
+      "v4_removed_prefix_count": 209,
       "v6_addresses_removed": 0,
       "v6_removed_prefix_count": 0
     },
@@ -640,6 +640,7 @@
         "178.187.160.0/19",
         "178.208.240.0/20",
         "178.252.96.0/19",
+        "185.16.212.0/22",
         "185.40.105.0/24",
         "185.41.185.64/26",
         "185.53.232.0/24",
@@ -803,14 +804,14 @@
       "slug": "yummyanime.tv"
     }
   ],
-  "ru_v4_prefix_count": 9278,
+  "ru_v4_prefix_count": 9280,
   "ru_v6_prefix_count": 2182,
   "schema_version": 1,
   "sources": [
     {
       "repo": "ipverse/rir-ip",
       "status": "ok",
-      "v4_prefix_count": 8626,
+      "v4_prefix_count": 8627,
       "v4_url": "https://raw.githubusercontent.com/ipverse/rir-ip/master/country/ru/ipv4-aggregated.txt",
       "v6_prefix_count": 2174,
       "v6_url": "https://raw.githubusercontent.com/ipverse/rir-ip/master/country/ru/ipv6-aggregated.txt"
@@ -819,9 +820,9 @@
       "repo": "russia.iplist.opencck.org",
       "restriction": "fully-within-ipverse-ru-only",
       "status": "ok",
-      "v4_prefix_count": 787,
-      "v4_raw_prefix_count": 982,
-      "v4_skipped_outside_ripe_ru": 195,
+      "v4_prefix_count": 788,
+      "v4_raw_prefix_count": 984,
+      "v4_skipped_outside_ripe_ru": 196,
       "v4_url": "https://russia.iplist.opencck.org/?format=text&data=cidr4&group=russia",
       "v6_prefix_count": 12,
       "v6_raw_prefix_count": 25,
@@ -831,8 +832,8 @@
   ],
   "totals": {
     "services_touched": 40,
-    "v4_addresses_removed": 254872544,
-    "v4_removed_prefix_count": 375,
+    "v4_addresses_removed": 254873568,
+    "v4_removed_prefix_count": 376,
     "v6_addresses_removed": 3436533714093636444210553946112,
     "v6_removed_prefix_count": 35
   }
