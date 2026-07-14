@@ -1,5 +1,5 @@
 {
-  "applied_at": "2026-07-13T06:07:47Z",
+  "applied_at": "2026-07-14T05:23:20Z",
   "by_category": {
     "ai": {
       "services_touched": 1,
@@ -805,16 +805,16 @@
       "slug": "yummyanime.tv"
     }
   ],
-  "ru_v4_prefix_count": 9278,
-  "ru_v6_prefix_count": 2181,
+  "ru_v4_prefix_count": 9280,
+  "ru_v6_prefix_count": 2182,
   "schema_version": 1,
   "sources": [
     {
       "repo": "ipverse/rir-ip",
       "status": "ok",
-      "v4_prefix_count": 8626,
+      "v4_prefix_count": 8628,
       "v4_url": "https://raw.githubusercontent.com/ipverse/rir-ip/master/country/ru/ipv4-aggregated.txt",
-      "v6_prefix_count": 2173,
+      "v6_prefix_count": 2174,
       "v6_url": "https://raw.githubusercontent.com/ipverse/rir-ip/master/country/ru/ipv6-aggregated.txt"
     },
     {
