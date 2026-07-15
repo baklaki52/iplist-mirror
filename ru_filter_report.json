@@ -1,5 +1,5 @@
 {
-  "applied_at": "2026-07-14T05:23:20Z",
+  "applied_at": "2026-07-15T05:24:51Z",
   "by_category": {
     "ai": {
       "services_touched": 1,
@@ -59,8 +59,8 @@
     },
     "shop": {
       "services_touched": 1,
-      "v4_addresses_removed": 35072224,
-      "v4_removed_prefix_count": 209,
+      "v4_addresses_removed": 35138080,
+      "v4_removed_prefix_count": 212,
       "v6_addresses_removed": 0,
       "v6_removed_prefix_count": 0
     },
@@ -86,9 +86,9 @@
       "v6_removed_prefix_count": 0
     },
     "video": {
-      "services_touched": 6,
-      "v4_addresses_removed": 16983808,
-      "v4_removed_prefix_count": 31,
+      "services_touched": 5,
+      "v4_addresses_removed": 16981760,
+      "v4_removed_prefix_count": 30,
       "v6_addresses_removed": 79228162514264337593543950336,
       "v6_removed_prefix_count": 1
     },
@@ -264,14 +264,6 @@
       ],
       "removed_v6": [],
       "slug": "kara.su"
-    },
-    {
-      "category": "video",
-      "removed_v4": [
-        "95.129.232.0/21"
-      ],
-      "removed_v6": [],
-      "slug": "kino.pub"
     },
     {
       "category": "anime",
@@ -588,6 +580,7 @@
         "93.90.103.0/28",
         "93.95.98.0/23",
         "93.95.100.0/22",
+        "93.153.244.0/26",
         "93.157.232.0/21",
         "93.183.81.0/24",
         "93.183.82.0/24",
@@ -630,6 +623,7 @@
         "176.109.104.0/21",
         "176.123.164.0/22",
         "176.124.213.0/24",
+        "176.196.0.0/16",
         "176.215.8.0/21",
         "176.215.176.0/21",
         "178.20.47.0/24",
@@ -668,6 +662,7 @@
         "193.192.36.0/24",
         "194.48.218.0/24",
         "194.190.168.0/24",
+        "194.226.120.0/24",
         "195.35.68.0/22",
         "195.39.248.0/28",
         "195.54.176.0/23",
@@ -832,9 +827,9 @@
     }
   ],
   "totals": {
-    "services_touched": 40,
-    "v4_addresses_removed": 254874080,
-    "v4_removed_prefix_count": 377,
+    "services_touched": 39,
+    "v4_addresses_removed": 254937888,
+    "v4_removed_prefix_count": 379,
     "v6_addresses_removed": 3436533714093636444210553946112,
     "v6_removed_prefix_count": 35
   }
