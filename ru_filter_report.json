@@ -1,5 +1,5 @@
 {
-  "applied_at": "2026-07-15T05:24:51Z",
+  "applied_at": "2026-07-16T05:33:28Z",
   "by_category": {
     "ai": {
       "services_touched": 1,
@@ -86,9 +86,9 @@
       "v6_removed_prefix_count": 0
     },
     "video": {
-      "services_touched": 5,
-      "v4_addresses_removed": 16981760,
-      "v4_removed_prefix_count": 30,
+      "services_touched": 6,
+      "v4_addresses_removed": 16983808,
+      "v4_removed_prefix_count": 31,
       "v6_addresses_removed": 79228162514264337593543950336,
       "v6_removed_prefix_count": 1
     },
@@ -264,6 +264,14 @@
       ],
       "removed_v6": [],
       "slug": "kara.su"
+    },
+    {
+      "category": "video",
+      "removed_v4": [
+        "95.129.232.0/21"
+      ],
+      "removed_v6": [],
+      "slug": "kino.watch"
     },
     {
       "category": "anime",
@@ -801,7 +809,7 @@
     }
   ],
   "ru_v4_prefix_count": 9280,
-  "ru_v6_prefix_count": 2182,
+  "ru_v6_prefix_count": 2183,
   "schema_version": 1,
   "sources": [
     {
@@ -809,7 +817,7 @@
       "status": "ok",
       "v4_prefix_count": 8628,
       "v4_url": "https://raw.githubusercontent.com/ipverse/rir-ip/master/country/ru/ipv4-aggregated.txt",
-      "v6_prefix_count": 2174,
+      "v6_prefix_count": 2175,
       "v6_url": "https://raw.githubusercontent.com/ipverse/rir-ip/master/country/ru/ipv6-aggregated.txt"
     },
     {
@@ -827,9 +835,9 @@
     }
   ],
   "totals": {
-    "services_touched": 39,
-    "v4_addresses_removed": 254937888,
-    "v4_removed_prefix_count": 379,
+    "services_touched": 40,
+    "v4_addresses_removed": 254939936,
+    "v4_removed_prefix_count": 380,
     "v6_addresses_removed": 3436533714093636444210553946112,
     "v6_removed_prefix_count": 35
   }
