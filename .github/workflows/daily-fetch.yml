@@ -26,6 +26,13 @@ jobs:
       - name: Fetch + normalize
         run: bash scripts/fetch.sh
 
+      - name: Overlay curated geoblock (RussiaFancyLists)
+        # Injects a curated slice of geo-restricting domains (hosting/dev/banks/AI/
+        # gaming) as service `vezdehod-geoblock` into both snapshots. Domain-only,
+        # so it never touches CIDR/critical-IP coverage. Fail-soft: geoblock fetch
+        # failure logs a warning and leaves snapshots untouched.
+        run: python3 scripts/geoblock_overlay.py
+
       - name: Diff vs previous main + critical-IP regression gate
         # Compares the freshly built snapshot-ru-clean.json against the one
         # currently on main. Fails (exit 1) if any IP in the CRITICAL_IPS
