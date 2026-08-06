@@ -1,5 +1,5 @@
 {
-  "applied_at": "2026-08-05T05:39:48Z",
+  "applied_at": "2026-08-06T05:41:46Z",
   "by_category": {
     "ai": {
       "services_touched": 1,
@@ -821,14 +821,14 @@
       "slug": "yummyanime.tv"
     }
   ],
-  "ru_v4_prefix_count": 9295,
+  "ru_v4_prefix_count": 9300,
   "ru_v6_prefix_count": 2187,
   "schema_version": 1,
   "sources": [
     {
       "repo": "ipverse/rir-ip",
       "status": "ok",
-      "v4_prefix_count": 8634,
+      "v4_prefix_count": 8639,
       "v4_url": "https://raw.githubusercontent.com/ipverse/rir-ip/master/country/ru/ipv4-aggregated.txt",
       "v6_prefix_count": 2178,
       "v6_url": "https://raw.githubusercontent.com/ipverse/rir-ip/master/country/ru/ipv6-aggregated.txt"
@@ -838,12 +838,12 @@
       "restriction": "fully-within-ipverse-ru-only",
       "status": "ok",
       "v4_prefix_count": 796,
-      "v4_raw_prefix_count": 1001,
-      "v4_skipped_outside_ripe_ru": 205,
+      "v4_raw_prefix_count": 1005,
+      "v4_skipped_outside_ripe_ru": 209,
       "v4_url": "https://russia.iplist.opencck.org/?format=text&data=cidr4&group=russia",
       "v6_prefix_count": 13,
-      "v6_raw_prefix_count": 30,
-      "v6_skipped_outside_ripe_ru": 17,
+      "v6_raw_prefix_count": 31,
+      "v6_skipped_outside_ripe_ru": 18,
       "v6_url": "https://russia.iplist.opencck.org/?format=text&data=cidr6&group=russia"
     }
   ],
