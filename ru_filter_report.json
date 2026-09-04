@@ -1,5 +1,5 @@
 {
-  "applied_at": "2026-09-03T07:35:39Z",
+  "applied_at": "2026-09-04T07:36:08Z",
   "by_category": {
     "ai": {
       "services_touched": 1,
@@ -79,9 +79,9 @@
       "v6_removed_prefix_count": 3
     },
     "tools": {
-      "services_touched": 3,
-      "v4_addresses_removed": 16780544,
-      "v4_removed_prefix_count": 8,
+      "services_touched": 4,
+      "v4_addresses_removed": 33557760,
+      "v4_removed_prefix_count": 9,
       "v6_addresses_removed": 79228162514264337593543950336,
       "v6_removed_prefix_count": 1
     },
@@ -315,6 +315,14 @@
         "2a00:1e48::/32"
       ],
       "slug": "linkedin.com"
+    },
+    {
+      "category": "tools",
+      "removed_v4": [
+        "141.0.0.0/8"
+      ],
+      "removed_v6": [],
+      "slug": "make.com"
     },
     {
       "category": "anime",
@@ -850,7 +858,7 @@
     {
       "repo": "ipverse/rir-ip",
       "status": "ok",
-      "v4_prefix_count": 8651,
+      "v4_prefix_count": 8650,
       "v4_url": "https://raw.githubusercontent.com/ipverse/rir-ip/master/country/ru/ipv4-aggregated.txt",
       "v6_prefix_count": 2178,
       "v6_url": "https://raw.githubusercontent.com/ipverse/rir-ip/master/country/ru/ipv6-aggregated.txt"
@@ -859,8 +867,8 @@
       "repo": "russia.iplist.opencck.org",
       "restriction": "fully-within-ipverse-ru-only",
       "status": "ok",
-      "v4_prefix_count": 803,
-      "v4_raw_prefix_count": 1015,
+      "v4_prefix_count": 804,
+      "v4_raw_prefix_count": 1016,
       "v4_skipped_outside_ripe_ru": 212,
       "v4_url": "https://russia.iplist.opencck.org/?format=text&data=cidr4&group=russia",
       "v6_prefix_count": 13,
@@ -870,9 +878,9 @@
     }
   ],
   "totals": {
-    "services_touched": 42,
-    "v4_addresses_removed": 271746592,
-    "v4_removed_prefix_count": 394,
+    "services_touched": 43,
+    "v4_addresses_removed": 288523808,
+    "v4_removed_prefix_count": 395,
     "v6_addresses_removed": 3436533714093636444210553946112,
     "v6_removed_prefix_count": 35
   }
