@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-09-11T07:39:37Z",
+  "generated_at": "2026-09-12T07:32:15Z",
   "source": "rekryt/iplist via iplist.opencck.org",
-  "source_tag": "v20260911",
+  "source_tag": "v20260912",
   "services": [
     {
       "slug": "10minutemail.com",
@@ -21883,6 +21883,32 @@
       ]
     },
     {
+      "slug": "revanced.app",
+      "name": "revanced.app",
+      "category": "youtube",
+      "cidr4": [
+        "8.0.0.0/13",
+        "8.32.0.0/11",
+        "104.16.0.0/12",
+        "172.64.0.0/13"
+      ],
+      "cidr6": [
+        "2606:4700::/32",
+        "2a06:98c1::/32"
+      ],
+      "domains": [
+        "api.revanced.app",
+        "revanced.app",
+        "www.revanced.app"
+      ],
+      "dns": [
+        "127.0.0.11:53",
+        "77.88.8.88:53",
+        "8.8.8.8:53",
+        "1.1.1.1:53"
+      ]
+    },
+    {
       "slug": "ru-board.com",
       "name": "ru-board.com",
       "category": "socials",
@@ -26489,6 +26515,7 @@
         "178.251.64.0/21",
         "178.252.96.0/19",
         "178.254.28.0/22",
+        "179.253.192.0/18",
         "184.32.0.0/12",
         "185.5.250.0/23",
         "185.11.138.0/23",
@@ -26584,6 +26611,7 @@
         "194.35.12.0/23",
         "194.36.144.0/23",
         "194.48.218.0/24",
+        "194.59.204.0/22",
         "194.62.248.0/24",
         "194.87.84.0/24",
         "194.87.92.0/22",
@@ -27195,6 +27223,7 @@
         "184.72.0.0/15",
         "184.192.0.0/10",
         "185.53.177.0/24",
+        "185.117.96.0/24",
         "185.199.108.0/22",
         "188.114.96.0/22",
         "192.155.80.0/20",
@@ -31258,6 +31287,7 @@
         "62.115.253.0/24",
         "65.8.0.0/14",
         "72.246.0.0/15",
+        "80.67.82.0/24",
         "80.239.137.128/25",
         "80.239.150.0/25",
         "80.239.254.0/24",
@@ -45044,6 +45074,8 @@
         "rr13---sn-n8v7knes.googlevideo.com",
         "rr13---sn-n8v7sney.googlevideo.com",
         "rr13---sn-n8v7znlk.googlevideo.com",
+        "rr13---sn-n8v7zns6.googlevideo.com",
+        "rr13---sn-n8v7znsy.googlevideo.com",
         "rr13---sn-n8v7znz7.googlevideo.com",
         "rr13.sn-3c27sn7d.googlevideo.com",
         "rr13.sn-3c27sn7e.googlevideo.com",
@@ -45985,6 +46017,7 @@
         "rr3---sn-hpa7znsz.googlevideo.com",
         "rr3---sn-hpa7znzy.googlevideo.com",
         "rr3---sn-n0q5uxanq-3gue.googlevideo.com",
+        "rr3---sn-n8v7kn7r.googlevideo.com",
         "rr3---sn-n8v7kn7s.googlevideo.com",
         "rr3---sn-n8v7knel.googlevideo.com",
         "rr3---sn-n8v7znsl.googlevideo.com",
@@ -47713,6 +47746,7 @@
         "rr8---sn-n8v7kn7k.googlevideo.com",
         "rr8---sn-n8v7knee.googlevideo.com",
         "rr8---sn-n8v7knel.googlevideo.com",
+        "rr8---sn-n8v7sney.googlevideo.com",
         "rr8---sn-n8v7snl7.googlevideo.com",
         "rr8---sn-n8v7znz7.googlevideo.com",
         "rr8---sn-pivhx-n8vs.googlevideo.com",
@@ -48438,7 +48472,7 @@
     }
   ],
   "asn_overlay": {
-    "applied_at": "2026-09-11T07:39:40Z",
+    "applied_at": "2026-09-12T07:32:18Z",
     "tool": "bgpq4",
     "entries": [
       {
