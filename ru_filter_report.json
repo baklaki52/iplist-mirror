@@ -1,5 +1,5 @@
 {
-  "applied_at": "2026-09-14T08:25:16Z",
+  "applied_at": "2026-09-15T08:16:44Z",
   "by_category": {
     "ai": {
       "services_touched": 1,
@@ -871,8 +871,8 @@
       "repo": "russia.iplist.opencck.org",
       "restriction": "fully-within-ipverse-ru-only",
       "status": "ok",
-      "v4_prefix_count": 804,
-      "v4_raw_prefix_count": 1016,
+      "v4_prefix_count": 805,
+      "v4_raw_prefix_count": 1017,
       "v4_skipped_outside_ripe_ru": 212,
       "v4_url": "https://russia.iplist.opencck.org/?format=text&data=cidr4&group=russia",
       "v6_prefix_count": 13,
