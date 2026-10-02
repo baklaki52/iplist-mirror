@@ -1,5 +1,5 @@
 {
-  "applied_at": "2026-10-01T09:39:38Z",
+  "applied_at": "2026-10-02T09:13:56Z",
   "by_category": {
     "ai": {
       "services_touched": 1,
@@ -66,8 +66,8 @@
     },
     "shop": {
       "services_touched": 1,
-      "v4_addresses_removed": 35169056,
-      "v4_removed_prefix_count": 230,
+      "v4_addresses_removed": 35185440,
+      "v4_removed_prefix_count": 231,
       "v6_addresses_removed": 0,
       "v6_removed_prefix_count": 0
     },
@@ -695,6 +695,7 @@
         "185.211.244.0/26",
         "185.228.112.0/23",
         "185.247.185.0/24",
+        "188.32.192.0/18",
         "188.113.128.0/19",
         "188.126.32.0/20",
         "188.134.72.0/21",
@@ -858,7 +859,7 @@
     }
   ],
   "ru_v4_prefix_count": 9325,
-  "ru_v6_prefix_count": 2183,
+  "ru_v6_prefix_count": 2184,
   "schema_version": 1,
   "sources": [
     {
@@ -866,7 +867,7 @@
       "status": "ok",
       "v4_prefix_count": 8652,
       "v4_url": "https://raw.githubusercontent.com/ipverse/rir-ip/master/country/ru/ipv4-aggregated.txt",
-      "v6_prefix_count": 2174,
+      "v6_prefix_count": 2175,
       "v6_url": "https://raw.githubusercontent.com/ipverse/rir-ip/master/country/ru/ipv6-aggregated.txt"
     },
     {
@@ -885,8 +886,8 @@
   ],
   "totals": {
     "services_touched": 43,
-    "v4_addresses_removed": 288527392,
-    "v4_removed_prefix_count": 401,
+    "v4_addresses_removed": 288543776,
+    "v4_removed_prefix_count": 402,
     "v6_addresses_removed": 3436533714093636444210553946112,
     "v6_removed_prefix_count": 35
   }
