@@ -1,5 +1,5 @@
 {
-  "applied_at": "2026-10-11T09:33:32Z",
+  "applied_at": "2026-10-12T10:04:00Z",
   "by_category": {
     "ai": {
       "services_touched": 1,
@@ -73,10 +73,10 @@
     },
     "socials": {
       "services_touched": 6,
-      "v4_addresses_removed": 100950304,
-      "v4_removed_prefix_count": 37,
-      "v6_addresses_removed": 79229371513870928517556862976,
-      "v6_removed_prefix_count": 3
+      "v4_addresses_removed": 100966496,
+      "v4_removed_prefix_count": 35,
+      "v6_addresses_removed": 79230580439690543146731569152,
+      "v6_removed_prefix_count": 4
     },
     "tools": {
       "services_touched": 4,
@@ -463,9 +463,7 @@
         "5.45.240.192/26",
         "5.255.252.192/26",
         "37.9.80.192/26",
-        "37.140.164.192/26",
-        "37.140.169.64/26",
-        "37.140.169.128/26",
+        "37.140.128.0/18",
         "77.41.248.0/21",
         "79.133.176.0/24",
         "80.87.198.0/23",
@@ -485,7 +483,8 @@
         "213.180.193.0/24"
       ],
       "removed_v6": [
-        "2a02:6b8::/62"
+        "2a02:6b8::/62",
+        "2a02:6b8:c43::/48"
       ],
       "slug": "tiktok.com"
     },
@@ -859,7 +858,7 @@
       "slug": "yummyanime.tv"
     }
   ],
-  "ru_v4_prefix_count": 9296,
+  "ru_v4_prefix_count": 9300,
   "ru_v6_prefix_count": 2178,
   "schema_version": 1,
   "sources": [
@@ -875,9 +874,9 @@
       "repo": "russia.iplist.opencck.org",
       "restriction": "fully-within-ipverse-ru-only",
       "status": "ok",
-      "v4_prefix_count": 778,
-      "v4_raw_prefix_count": 991,
-      "v4_skipped_outside_ripe_ru": 213,
+      "v4_prefix_count": 782,
+      "v4_raw_prefix_count": 1001,
+      "v4_skipped_outside_ripe_ru": 219,
       "v4_url": "https://russia.iplist.opencck.org/?format=text&data=cidr4&group=russia",
       "v6_prefix_count": 13,
       "v6_raw_prefix_count": 31,
@@ -887,9 +886,9 @@
   ],
   "totals": {
     "services_touched": 43,
-    "v4_addresses_removed": 288547872,
-    "v4_removed_prefix_count": 403,
-    "v6_addresses_removed": 3436533714093636444210553946112,
-    "v6_removed_prefix_count": 35
+    "v4_addresses_removed": 288564064,
+    "v4_removed_prefix_count": 401,
+    "v6_addresses_removed": 3436534923019456058839728652288,
+    "v6_removed_prefix_count": 36
   }
 }
