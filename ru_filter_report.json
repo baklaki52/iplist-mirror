@@ -1,5 +1,5 @@
 {
-  "applied_at": "2026-10-17T07:24:24Z",
+  "applied_at": "2026-10-18T07:38:27Z",
   "by_category": {
     "ai": {
       "services_touched": 1,
@@ -66,8 +66,8 @@
     },
     "shop": {
       "services_touched": 1,
-      "v4_addresses_removed": 35193888,
-      "v4_removed_prefix_count": 234,
+      "v4_addresses_removed": 35194144,
+      "v4_removed_prefix_count": 235,
       "v6_addresses_removed": 0,
       "v6_removed_prefix_count": 0
     },
@@ -670,6 +670,7 @@
         "176.196.0.0/16",
         "176.215.8.0/21",
         "176.215.176.0/21",
+        "178.20.42.0/24",
         "178.20.47.0/24",
         "178.46.144.0/20",
         "178.141.254.0/24",
@@ -877,8 +878,8 @@
       "restriction": "fully-within-ipverse-ru-only",
       "status": "ok",
       "v4_prefix_count": 790,
-      "v4_raw_prefix_count": 1013,
-      "v4_skipped_outside_ripe_ru": 223,
+      "v4_raw_prefix_count": 1014,
+      "v4_skipped_outside_ripe_ru": 224,
       "v4_url": "https://russia.iplist.opencck.org/?format=text&data=cidr4&group=russia",
       "v6_prefix_count": 13,
       "v6_raw_prefix_count": 31,
@@ -888,8 +889,8 @@
   ],
   "totals": {
     "services_touched": 43,
-    "v4_addresses_removed": 288568416,
-    "v4_removed_prefix_count": 403,
+    "v4_addresses_removed": 288568672,
+    "v4_removed_prefix_count": 404,
     "v6_addresses_removed": 3436534923019456058839728652288,
     "v6_removed_prefix_count": 36
   }
