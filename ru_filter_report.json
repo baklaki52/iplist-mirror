@@ -1,5 +1,5 @@
 {
-  "applied_at": "2026-10-26T08:21:11Z",
+  "applied_at": "2026-10-27T08:33:27Z",
   "by_category": {
     "ai": {
       "services_touched": 1,
@@ -17,8 +17,8 @@
     },
     "art": {
       "services_touched": 2,
-      "v4_addresses_removed": 18432,
-      "v4_removed_prefix_count": 3,
+      "v4_addresses_removed": 20480,
+      "v4_removed_prefix_count": 4,
       "v6_addresses_removed": 0,
       "v6_removed_prefix_count": 0
     },
@@ -59,8 +59,8 @@
     },
     "news": {
       "services_touched": 6,
-      "v4_addresses_removed": 16849664,
-      "v4_removed_prefix_count": 8,
+      "v4_addresses_removed": 16850304,
+      "v4_removed_prefix_count": 10,
       "v6_addresses_removed": 2417851639229258349412352,
       "v6_removed_prefix_count": 2
     },
@@ -352,6 +352,8 @@
     {
       "category": "news",
       "removed_v4": [
+        "31.177.76.0/23",
+        "31.177.80.0/25",
         "188.186.144.0/22",
         "188.186.152.0/22"
       ],
@@ -398,6 +400,7 @@
       "category": "art",
       "removed_v4": [
         "84.201.128.0/18",
+        "95.129.232.0/21",
         "185.178.208.0/22"
       ],
       "removed_v6": [],
@@ -862,14 +865,14 @@
       "slug": "yummyanime.tv"
     }
   ],
-  "ru_v4_prefix_count": 9319,
+  "ru_v4_prefix_count": 9320,
   "ru_v6_prefix_count": 2176,
   "schema_version": 1,
   "sources": [
     {
       "repo": "ipverse/rir-ip",
       "status": "ok",
-      "v4_prefix_count": 8671,
+      "v4_prefix_count": 8672,
       "v4_url": "https://raw.githubusercontent.com/ipverse/rir-ip/master/country/ru/ipv4-aggregated.txt",
       "v6_prefix_count": 2167,
       "v6_url": "https://raw.githubusercontent.com/ipverse/rir-ip/master/country/ru/ipv6-aggregated.txt"
@@ -890,8 +893,8 @@
   ],
   "totals": {
     "services_touched": 43,
-    "v4_addresses_removed": 288576864,
-    "v4_removed_prefix_count": 405,
+    "v4_addresses_removed": 288579552,
+    "v4_removed_prefix_count": 408,
     "v6_addresses_removed": 3436534923019456058839728652288,
     "v6_removed_prefix_count": 36
   }
