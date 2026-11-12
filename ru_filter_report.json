@@ -1,5 +1,5 @@
 {
-  "applied_at": "2026-11-11T10:07:56Z",
+  "applied_at": "2026-11-12T10:31:17Z",
   "by_category": {
     "ai": {
       "services_touched": 1,
@@ -9,9 +9,9 @@
       "v6_removed_prefix_count": 0
     },
     "anime": {
-      "services_touched": 7,
-      "v4_addresses_removed": 74624,
-      "v4_removed_prefix_count": 21,
+      "services_touched": 8,
+      "v4_addresses_removed": 76672,
+      "v4_removed_prefix_count": 22,
       "v6_addresses_removed": 1208925819614629174706176,
       "v6_removed_prefix_count": 1
     },
@@ -115,6 +115,14 @@
       ],
       "removed_v6": [],
       "slug": "4pda.to"
+    },
+    {
+      "category": "anime",
+      "removed_v4": [
+        "95.129.232.0/21"
+      ],
+      "removed_v6": [],
+      "slug": "amedia.site"
     },
     {
       "category": "anime",
@@ -869,16 +877,16 @@
       "slug": "yummyanime.tv"
     }
   ],
-  "ru_v4_prefix_count": 9325,
-  "ru_v6_prefix_count": 2176,
+  "ru_v4_prefix_count": 9327,
+  "ru_v6_prefix_count": 2177,
   "schema_version": 1,
   "sources": [
     {
       "repo": "ipverse/rir-ip",
       "status": "ok",
-      "v4_prefix_count": 8675,
+      "v4_prefix_count": 8677,
       "v4_url": "https://raw.githubusercontent.com/ipverse/rir-ip/master/country/ru/ipv4-aggregated.txt",
-      "v6_prefix_count": 2168,
+      "v6_prefix_count": 2169,
       "v6_url": "https://raw.githubusercontent.com/ipverse/rir-ip/master/country/ru/ipv6-aggregated.txt"
     },
     {
@@ -896,9 +904,9 @@
     }
   ],
   "totals": {
-    "services_touched": 43,
-    "v4_addresses_removed": 288598752,
-    "v4_removed_prefix_count": 412,
+    "services_touched": 44,
+    "v4_addresses_removed": 288600800,
+    "v4_removed_prefix_count": 413,
     "v6_addresses_removed": 3436534923019456058839728652288,
     "v6_removed_prefix_count": 36
   }

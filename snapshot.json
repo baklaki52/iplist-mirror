@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-11T10:07:50Z",
+  "generated_at": "2026-11-12T10:31:11Z",
   "source": "rekryt/iplist via iplist.opencck.org",
-  "source_tag": "v20261111",
+  "source_tag": "v20261112",
   "services": [
     {
       "slug": "10minutemail.com",
@@ -349,6 +349,7 @@
       "name": "amedia.site",
       "category": "anime",
       "cidr4": [
+        "95.129.232.0/21",
         "186.2.165.0/24"
       ],
       "cidr6": [],
@@ -2637,6 +2638,7 @@
         "195.201.62.192/26",
         "199.247.0.0/19",
         "207.211.208.0/21",
+        "212.102.40.112/28",
         "216.198.0.0/18"
       ],
       "cidr6": [
@@ -24955,7 +24957,8 @@
         "2600:9000::/28",
         "2603:1000::/24",
         "2606:4700::/32",
-        "2a01:4f9:3070:3934::/64"
+        "2a01:4f9:3070:3934::/64",
+        "2a0d:5600:1a::/48"
       ],
       "domains": [
         "api-bunny.themoviedb.org",
@@ -49033,7 +49036,7 @@
     }
   ],
   "asn_overlay": {
-    "applied_at": "2026-11-11T10:07:52Z",
+    "applied_at": "2026-11-12T10:31:15Z",
     "tool": "bgpq4",
     "entries": [
       {
