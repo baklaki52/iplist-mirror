@@ -1,5 +1,5 @@
 {
-  "applied_at": "2026-11-23T11:36:44Z",
+  "applied_at": "2026-11-24T13:09:39Z",
   "by_category": {
     "ai": {
       "services_touched": 1,
@@ -58,9 +58,9 @@
       "v6_removed_prefix_count": 1
     },
     "news": {
-      "services_touched": 6,
-      "v4_addresses_removed": 16850304,
-      "v4_removed_prefix_count": 10,
+      "services_touched": 7,
+      "v4_addresses_removed": 16883072,
+      "v4_removed_prefix_count": 11,
       "v6_addresses_removed": 2417851639229258349412352,
       "v6_removed_prefix_count": 2
     },
@@ -94,8 +94,8 @@
     },
     "video": {
       "services_touched": 7,
-      "v4_addresses_removed": 16985856,
-      "v4_removed_prefix_count": 32,
+      "v4_addresses_removed": 16986112,
+      "v4_removed_prefix_count": 33,
       "v6_addresses_removed": 79228162514264337593543950336,
       "v6_removed_prefix_count": 1
     },
@@ -187,6 +187,7 @@
       "category": "video",
       "removed_v4": [
         "141.8.192.0/24",
+        "193.233.15.0/24",
         "193.233.63.0/24"
       ],
       "removed_v6": [
@@ -279,6 +280,14 @@
       ],
       "removed_v6": [],
       "slug": "kara.su"
+    },
+    {
+      "category": "news",
+      "removed_v4": [
+        "146.19.128.0/17"
+      ],
+      "removed_v6": [],
+      "slug": "kavkaz-uzel.eu"
     },
     {
       "category": "video",
@@ -884,7 +893,7 @@
       "slug": "yummyanime.tv"
     }
   ],
-  "ru_v4_prefix_count": 9342,
+  "ru_v4_prefix_count": 9343,
   "ru_v6_prefix_count": 2172,
   "schema_version": 1,
   "sources": [
@@ -900,8 +909,8 @@
       "repo": "russia.iplist.opencck.org",
       "restriction": "fully-within-ipverse-ru-only",
       "status": "ok",
-      "v4_prefix_count": 799,
-      "v4_raw_prefix_count": 1035,
+      "v4_prefix_count": 800,
+      "v4_raw_prefix_count": 1036,
       "v4_skipped_outside_ripe_ru": 236,
       "v4_url": "https://russia.iplist.opencck.org/?format=text&data=cidr4&group=russia",
       "v6_prefix_count": 13,
@@ -911,9 +920,9 @@
     }
   ],
   "totals": {
-    "services_touched": 44,
-    "v4_addresses_removed": 288611040,
-    "v4_removed_prefix_count": 420,
+    "services_touched": 45,
+    "v4_addresses_removed": 288644064,
+    "v4_removed_prefix_count": 422,
     "v6_addresses_removed": 3436534923019456058839728652288,
     "v6_removed_prefix_count": 36
   }
